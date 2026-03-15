@@ -2175,6 +2175,8 @@ function hideARLoading() {
   el.style.opacity = '0';
   setTimeout(() => { el.style.display = 'none'; el.style.opacity = '1'; }, 420);
 }
+
+function updateScaleBar(scale) {
   const segs = document.querySelectorAll('.hud-bar-seg');
   const lit  = Math.round((scale/4) * segs.length);
   segs.forEach((s,i)=>s.classList.toggle('lit', i<lit));
