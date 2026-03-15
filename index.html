@@ -478,14 +478,25 @@ nav {
 /* =============================================
    AR MODE
    ============================================= */
-#view-ar { flex-direction: column; position: relative; overflow: hidden; }
+#view-ar {
+  flex-direction: column; position: relative; overflow: hidden;
+  width: 100vw; height: 100vh;       /* explicit viewport fill */
+  background: #000;                  /* black base so it's never blank */
+}
 
 #ar-video {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; transform: scaleX(-1); z-index: 1;
+  opacity: 0.45;                     /* dim video so atom pops */
 }
-#ar-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
-#gesture-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
+#ar-canvas {
+  position: absolute; inset: 0; width: 100% !important; height: 100% !important;
+  z-index: 2;
+}
+#gesture-canvas {
+  position: absolute; inset: 0; width: 100% !important; height: 100% !important;
+  z-index: 3; pointer-events: none;
+}
 
 /* Video dimmer with vignette */
 .ar-vignette {
@@ -597,9 +608,10 @@ nav {
 
 /* AR loading overlay */
 #ar-loading {
-  position: absolute; inset: 0; z-index: 20;
+  position: absolute; inset: 0; z-index: 50;   /* above everything */
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   background: var(--bg0);
+  transition: opacity 0.4s;
 }
 .loading-visual { position: relative; width: 80px; height: 80px; margin-bottom: 24px; }
 .loading-ring {
@@ -1988,13 +2000,14 @@ let arStream = null; // keep stream reference so we can stop it
 function initARMode() {
   const loading = document.getElementById('ar-loading');
   loading.style.display = 'flex';
+  loading.style.opacity = '1';
   document.getElementById('ar-load-text').textContent = 'REQUESTING CAMERA ACCESS';
   document.getElementById('ar-load-sub').textContent = 'Please allow camera permission...';
 
   // Stop any previous stream
   if (arStream) { arStream.getTracks().forEach(t => t.stop()); arStream = null; }
 
-  // Use a short timeout so the view is fully rendered before we measure canvas size
+  // Short timeout so the view is fully painted before we start
   setTimeout(() => {
     navigator.mediaDevices.getUserMedia({
       video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
@@ -2005,17 +2018,17 @@ function initARMode() {
       const video = document.getElementById('ar-video');
       video.srcObject = stream;
       video.onloadedmetadata = () => {
-        video.play().catch(()=>{});
+        video.play().catch(() => {});
         document.getElementById('ar-load-text').textContent = 'BUILDING ATOM';
         document.getElementById('ar-load-sub').textContent = 'Initializing 3D engine...';
         setupARScene();
-        setTimeout(() => { loading.style.display = 'none'; }, 600);
+        setTimeout(() => hideARLoading(), 600);
       };
-      // Fallback if onloadedmetadata doesn't fire
+      // Hard fallback — if metadata never fires after 3s, start anyway
       setTimeout(() => {
         if (loading.style.display !== 'none') {
           setupARScene();
-          loading.style.display = 'none';
+          hideARLoading();
         }
       }, 3000);
     })
@@ -2025,28 +2038,34 @@ function initARMode() {
       document.getElementById('ar-load-sub').textContent = 'No camera — mouse controls active';
       setTimeout(() => {
         setupARScene();
-        loading.style.display = 'none';
+        hideARLoading();
         toast('No camera — using mouse demo mode', 'warn', '⚠');
         simulateHandTracking();
       }, 1000);
     });
-  }, 120); // wait for view to paint
+  }, 150);
 }
 
 function setupARScene() {
-  const canvas    = document.getElementById('ar-canvas');
-  const container = document.getElementById('view-ar');
+  const canvas = document.getElementById('ar-canvas');
 
-  if(arRenderer) { arRenderer.dispose(); cancelAnimationFrame(arFrame); arRenderer=null; }
+  if (arRenderer) { arRenderer.dispose(); cancelAnimationFrame(arFrame); arRenderer = null; }
 
-  // Fallback to window size — container may not have layout yet
-  const W = (container.clientWidth  > 10 ? container.clientWidth  : window.innerWidth);
-  const H = (container.clientHeight > 10 ? container.clientHeight : window.innerHeight) - 56;
+  // Always use window dimensions — never trust container at this point
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  // Set canvas buffer size explicitly
   canvas.width  = W;
   canvas.height = H;
-  // Also size gesture canvas upfront
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  // Size gesture canvas too
   const gc = document.getElementById('gesture-canvas');
-  gc.width = W; gc.height = H;
+  gc.width  = W; gc.height  = H;
+  gc.style.width  = W + 'px';
+  gc.style.height = H + 'px';
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference:'high-performance' });
   renderer.setSize(canvas.width, canvas.height);
@@ -2089,7 +2108,11 @@ function setupARScene() {
   loop(0);
 }
 
-function updateScaleBar(scale) {
+function hideARLoading() {
+  const el = document.getElementById('ar-loading');
+  el.style.opacity = '0';
+  setTimeout(() => { el.style.display = 'none'; el.style.opacity = '1'; }, 420);
+}
   const segs = document.querySelectorAll('.hud-bar-seg');
   const lit  = Math.round((scale/4) * segs.length);
   segs.forEach((s,i)=>s.classList.toggle('lit', i<lit));
