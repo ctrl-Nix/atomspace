@@ -187,7 +187,7 @@ nav {
 /* =============================================
    PERIODIC TABLE VIEW
    ============================================= */
-#view-table { overflow-y: auto; padding: 70px 16px 32px; }
+#view-table { overflow-y: auto; overflow-x: hidden; padding: 70px 16px 32px; -webkit-overflow-scrolling: touch; }
 
 .table-topbar {
   display: flex; align-items: flex-start; justify-content: space-between;
@@ -476,9 +476,275 @@ nav {
 .compare-slot .cs-remove:hover { color: var(--nr); }
 
 /* =============================================
-   AR MODE
+   MODE SELECTOR BAR
    ============================================= */
-#view-ar {
+.mode-bar {
+  position: fixed; top: 56px; left: 50%; transform: translateX(-50%);
+  z-index: 150; display: flex; gap: 4px;
+  background: rgba(4,14,30,0.92); border: 1px solid var(--bdr);
+  border-top: none; border-radius: 0 0 8px 8px;
+  padding: 6px 10px; backdrop-filter: blur(16px);
+}
+.mode-btn {
+  padding: 6px 16px; border: 1px solid transparent; border-radius: 4px;
+  font-family: var(--fm); font-size: 0.65rem; letter-spacing: 1.5px; color: var(--t3);
+  cursor: pointer; transition: all 0.2s; background: transparent; text-transform: uppercase;
+}
+.mode-btn:hover { color: var(--t1); border-color: var(--bdr); }
+.mode-btn.active { color: var(--nc); border-color: var(--nc); background: rgba(0,245,255,0.08); box-shadow: 0 0 10px rgba(0,245,255,0.15); }
+
+/* =============================================
+   MOLECULE BUILDER VIEW
+   ============================================= */
+#view-molecule { background: var(--bg0); overflow: hidden; }
+#view-molecule.active { display: flex; flex-direction: column; }
+#mol-canvas-wrap { flex: 1; position: relative; }
+#mol-canvas { display: block; width: 100%; height: 100%; }
+.mol-toolbar {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 20; align-items: center;
+  background: rgba(4,14,30,0.9); border: 1px solid var(--bdr);
+  border-radius: 8px; padding: 10px 16px; backdrop-filter: blur(12px);
+}
+.mol-element-btn {
+  width: 52px; height: 52px; border: 1px solid var(--bdr); border-radius: 6px;
+  background: var(--bgc); cursor: pointer; transition: all 0.2s;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+}
+.mol-element-btn:hover, .mol-element-btn.selected { border-color: var(--nc); box-shadow: 0 0 12px rgba(0,245,255,0.4); background: rgba(0,245,255,0.1); }
+.mol-el-sym { font-family: var(--fd); font-size: 1rem; font-weight: 700; color: var(--nc); }
+.mol-el-name { font-family: var(--fm); font-size: 0.45rem; color: var(--t3); }
+.mol-sep { width: 1px; height: 40px; background: var(--bdr); margin: 0 4px; }
+.mol-action-btn {
+  padding: 8px 14px; border: 1px solid var(--bdr); border-radius: 5px;
+  font-family: var(--fm); font-size: 0.62rem; color: var(--t2);
+  cursor: pointer; transition: all 0.15s; background: transparent;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.mol-action-btn:hover { color: var(--nc); border-color: var(--nc); }
+.mol-action-btn .icon { font-size: 1rem; }
+
+.mol-info-panel {
+  position: absolute; right: 16px; top: 90px; width: 240px;
+  background: rgba(4,14,30,0.92); border: 1px solid var(--bdr);
+  border-radius: 8px; padding: 14px; z-index: 20; backdrop-filter: blur(12px);
+}
+.mol-info-title { font-family: var(--fd); font-size: 0.7rem; color: var(--nc); letter-spacing: 2px; margin-bottom: 10px; }
+.mol-bond-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--bdr); font-family: var(--fm); font-size: 0.62rem; }
+.mol-bond-label { color: var(--t3); }
+.mol-bond-val { color: var(--t1); }
+
+.mol-preset-bar {
+  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 20;
+  background: rgba(4,14,30,0.9); border: 1px solid var(--bdr);
+  border-radius: 8px; padding: 8px 14px; backdrop-filter: blur(12px);
+}
+.mol-preset-btn {
+  padding: 6px 14px; border: 1px solid var(--bdr); border-radius: 4px;
+  font-family: var(--fm); font-size: 0.62rem; color: var(--t2);
+  cursor: pointer; transition: all 0.15s; background: transparent;
+}
+.mol-preset-btn:hover { color: var(--nc); border-color: var(--nc); }
+
+/* Bond label */
+.bond-label {
+  position: absolute; pointer-events: none; z-index: 15;
+  font-family: var(--fm); font-size: 0.6rem; color: var(--ng);
+  transform: translate(-50%,-50%);
+}
+
+/* =============================================
+   PLAYGROUND VIEW
+   ============================================= */
+#view-playground { background: radial-gradient(ellipse at center, #050d1a 0%, var(--bg0) 70%); }
+#view-playground.active { display: block; }
+#playground-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.playground-toolbar {
+  position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 10px; z-index: 20; align-items: center;
+  background: rgba(4,14,30,0.92); border: 1px solid var(--bdr);
+  border-radius: 10px; padding: 12px 18px; backdrop-filter: blur(16px);
+}
+.pg-btn {
+  padding: 9px 18px; border: 1px solid var(--bdr); border-radius: 5px;
+  font-family: var(--fm); font-size: 0.65rem; letter-spacing: 1px; color: var(--t2);
+  cursor: pointer; transition: all 0.15s; background: transparent; text-transform: uppercase;
+}
+.pg-btn:hover { color: var(--nc); border-color: var(--nc); }
+.pg-btn.active { color: var(--nc); border-color: var(--nc); background: rgba(0,245,255,0.1); }
+.pg-physics-badge {
+  font-family: var(--fm); font-size: 0.6rem; color: var(--t3); letter-spacing: 1px;
+}
+.pg-hud {
+  position: absolute; top: 72px; left: 20px; z-index: 20;
+  font-family: var(--fm); font-size: 0.65rem; color: var(--t2);
+}
+.pg-hud-line { margin-bottom: 4px; }
+.pg-hud-line span { color: var(--ng); }
+
+/* =============================================
+   EXCITATION FLASH EFFECT
+   ============================================= */
+.photon-flash {
+  position: fixed; inset: 0; z-index: 5000; pointer-events: none;
+  opacity: 0; animation: flash-anim 0.4s forwards;
+}
+@keyframes flash-anim {
+  0%  { opacity: 0; }
+  20% { opacity: 0.35; }
+  100%{ opacity: 0; }
+}
+
+/* Excitation HUD indicator */
+.excitation-indicator {
+  position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+  font-family: var(--fd); font-size: 0.85rem; letter-spacing: 3px;
+  padding: 8px 24px; border: 1px solid; border-radius: 5px;
+  pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 30;
+  backdrop-filter: blur(8px);
+}
+
+/* =============================================
+   ENERGY LEVEL DIAGRAM (Atom Viewer overlay)
+   ============================================= */
+.energy-diagram {
+  position: absolute; bottom: 20px; left: 20px; z-index: 20;
+  background: rgba(4,14,30,0.88); border: 1px solid var(--bdr);
+  border-radius: 8px; padding: 12px 14px; display: none; backdrop-filter: blur(12px);
+  min-width: 160px;
+}
+.energy-diagram.visible { display: block; }
+.ed-title { font-family: var(--fm); font-size: 0.6rem; color: var(--t3); letter-spacing: 2px; margin-bottom: 8px; }
+.ed-level {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+}
+.ed-line { flex: 1; height: 2px; border-radius: 1px; }
+.ed-label { font-family: var(--fm); font-size: 0.58rem; color: var(--t3); width: 20px; }
+.ed-electrons { display: flex; gap: 3px; }
+.ed-e { width: 7px; height: 7px; border-radius: 50%; border: 1px solid; }
+
+/* =============================================
+   HOLOGRAPHIC PANELS
+   ============================================= */
+.holo-panel {
+  background: linear-gradient(135deg, rgba(0,245,255,0.06) 0%, rgba(0,80,160,0.08) 100%);
+  border: 1px solid var(--bdr); border-radius: 8px;
+  backdrop-filter: blur(16px) saturate(180%);
+  position: relative; overflow: hidden;
+}
+.holo-panel::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,245,255,0.6), transparent);
+}
+.holo-panel::after {
+  content: ''; position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 30%, rgba(0,245,255,0.03) 0%, transparent 60%);
+  pointer-events: none; animation: holo-shimmer 6s ease-in-out infinite;
+}
+@keyframes holo-shimmer {
+  0%,100% { transform: translate(0,0); }
+  50%      { transform: translate(10%,5%); }
+}
+
+/* Glowing element cards on periodic table hover */
+.element-cell::before {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse at center, rgba(0,245,255,0.0) 0%, transparent 70%);
+  transition: background 0.3s;
+}
+.element-cell:hover:not(.cell-empty)::before {
+  background: radial-gradient(ellipse at center, rgba(0,245,255,0.08) 0%, transparent 70%);
+}
+
+/* Animated element cell border on hover */
+@keyframes cell-border-spin {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+
+/* AR hand cursor ring — shown at hand position */
+.ar-hand-ring {
+  position: absolute; z-index: 8; pointer-events: none;
+  border-radius: 50%; border: 2px solid rgba(0,245,255,0.8);
+  transform: translate(-50%,-50%);
+  box-shadow: 0 0 12px rgba(0,245,255,0.5), inset 0 0 8px rgba(0,245,255,0.1);
+  transition: width 0.08s, height 0.08s, border-color 0.15s;
+}
+
+/* Playground atom label */
+.pg-atom-badge {
+  position: absolute; font-family: var(--fm); font-size: 0.55rem;
+  color: rgba(0,245,255,0.7); pointer-events: none; z-index: 15;
+  transform: translate(-50%, -120%); white-space: nowrap;
+}
+
+/* Molecule bond type indicator */
+.bond-type-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 10px;
+  font-family: var(--fm); font-size: 0.58rem;
+  margin-top: 4px;
+}
+.bond-single { background: rgba(68,170,255,0.15); color: #44aaff; border: 1px solid rgba(68,170,255,0.3); }
+.bond-double { background: rgba(0,255,136,0.15); color: #00ff88; border: 1px solid rgba(0,255,136,0.3); }
+.bond-ionic  { background: rgba(255,200,0,0.15);  color: #ffcc00; border: 1px solid rgba(255,200,0,0.3); }
+
+/* Element viewer — holographic background */
+#atom-canvas-container {
+  background: radial-gradient(ellipse at 40% 50%,
+    rgba(0,20,60,0.8) 0%,
+    rgba(0,40,80,0.4) 40%,
+    var(--bg0) 70%);
+}
+
+/* Scan sweep on atom viewer */
+#atom-canvas-container::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,245,255,0.15), transparent);
+  animation: scan-sweep 8s linear infinite; pointer-events: none;
+  top: 0; z-index: 5;
+}
+@keyframes scan-sweep { from { top: 0; } to { top: 100%; } }
+
+/* Enhanced nav tab active glow */
+.nav-tab.active {
+  color: var(--nc); border-color: var(--nc);
+  background: rgba(0,245,255,0.06);
+  box-shadow: 0 0 16px rgba(0,245,255,0.15), inset 0 0 16px rgba(0,245,255,0.04),
+              0 2px 0 var(--nc);
+}
+
+/* Playground — atom count badge */
+#pg-atom-count { 
+  color: var(--nc); font-weight: bold;
+  text-shadow: 0 0 8px var(--nc);
+}
+
+/* Toast improvements */
+.toast { animation: toast-in 0.3s cubic-bezier(0.22,1,0.36,1), toast-glow 2s ease-in-out 0.3s; }
+@keyframes toast-glow {
+  0%,100% { box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 8px rgba(0,245,255,0.08); }
+  50%     { box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(0,245,255,0.2); }
+}
+
+/* Molecule preset button hover glow */
+.mol-preset-btn:hover {
+  color: var(--nc); border-color: var(--nc);
+  box-shadow: 0 0 12px rgba(0,245,255,0.3);
+  background: rgba(0,245,255,0.08);
+}
+
+/* Atom viewer stat items animated border */
+.stat-item {
+  background: rgba(0,245,255,0.04); border: 1px solid var(--bdr); border-radius: 5px;
+  padding: 8px 10px; transition: border-color 0.3s, background 0.3s;
+}
+.stat-item:hover {
+  border-color: rgba(0,245,255,0.4);
+  background: rgba(0,245,255,0.08);
+}
   flex-direction: column; position: relative; overflow: hidden;
   width: 100vw; height: 100vh;       /* explicit viewport fill */
   background: #000;                  /* black base so it's never blank */
@@ -676,6 +942,200 @@ nav {
 .compare-stat-row .val { color: var(--t1); font-family: var(--fm); }
 .compare-stat-row .val.better { color: var(--ng); }
 .compare-stat-row .val.worse { color: var(--nr); }
+
+/* =============================================
+   ENHANCED ATOM VISUAL — GLOW + ORBITALS
+   ============================================= */
+#atom-canvas-container {
+  background: radial-gradient(ellipse at 42% 50%,
+    rgba(0,30,80,0.9) 0%, rgba(0,15,40,0.6) 40%, var(--bg0) 75%) !important;
+  cursor: grab;
+}
+#atom-canvas-container:active { cursor: grabbing; }
+
+/* Scan sweep line */
+#atom-canvas-container::before {
+  content: ''; position: absolute; left: 0; right: 0; height: 1px; z-index: 1;
+  background: linear-gradient(90deg, transparent 0%, rgba(0,245,255,0.12) 50%, transparent 100%);
+  animation: scan-vertical 10s linear infinite; pointer-events: none;
+}
+@keyframes scan-vertical { from {top:0} to {top:100%} }
+
+/* =============================================
+   RESPONSIVE BREAKPOINTS — COMPLETE OVERHAUL
+   ============================================= */
+
+/* ---- Tablet (≤900px) ---- */
+@media (max-width: 900px) {
+  /* Nav */
+  nav { padding: 0 12px; height: 52px; }
+  .nav-logo { font-size: 1rem; letter-spacing: 2px; }
+  .nav-tab  { font-size: 0.62rem; padding: 6px 10px; letter-spacing: 1px; }
+  .nav-clock { display: none; }
+
+  /* Periodic Table */
+  .table-topbar { flex-direction: column; gap: 10px; }
+  .table-controls { flex-wrap: wrap; }
+  .search-input { width: 180px; }
+
+  /* Atom Viewer — stack vertically */
+  #view-atom { flex-direction: column !important; }
+  #atom-canvas-container { flex: none; height: 55vw; min-height: 260px; }
+  .atom-info-panel { width: 100% !important; min-width: unset !important; height: auto; border-left: none; border-top: 1px solid var(--bdr); overflow-y: visible; max-height: 40vh; overflow-y: auto; }
+
+  /* Home */
+  .home-title .t-big, .home-title .t-glow { font-size: clamp(2.2rem,7vw,4rem); }
+  .home-sub { font-size: 0.7rem; margin-bottom: 32px; }
+  .home-atom-preview { width: 130px; height: 130px; margin-bottom: 24px; }
+  .home-card { width: 160px; padding: 18px 14px; }
+  .hc-title { font-size: 0.68rem; }
+
+  /* Mol builder */
+  .mol-info-panel { display: none; }
+  .mol-toolbar { flex-wrap: wrap; justify-content: center; padding: 8px; gap: 6px; }
+}
+
+/* ---- Mobile (≤600px) ---- */
+@media (max-width: 600px) {
+  /* Body */
+  html, body { -webkit-overflow-scrolling: touch; }
+  .view { padding-top: 52px; }
+
+  /* Nav — icon-only on very small screens */
+  nav { height: 52px; padding: 0 10px; gap: 4px; }
+  .nav-logo { font-size: 0.88rem; letter-spacing: 1px; }
+  .nav-logo .dot { display: none; }
+  .nav-tabs { gap: 1px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab { font-size: 0.58rem; padding: 5px 8px; letter-spacing: 0; white-space: nowrap; border-radius: 3px; }
+  .nav-status { display: none; }
+
+  /* Periodic table — scale down grid cells drastically */
+  #view-table { padding: 60px 6px 80px; }
+  .table-topbar { margin-bottom: 10px; }
+  .table-title-block h1 { font-size: 1.1rem; letter-spacing: 1px; }
+  .table-title-block p { font-size: 0.55rem; }
+  .table-controls { gap: 6px; }
+  .search-input { width: 140px; font-size: 0.68rem; padding: 6px 10px 6px 26px; }
+  .filter-select { font-size: 0.62rem; padding: 6px 8px; }
+  .prop-toggle-group { display: none; }  /* hide on mobile, saves space */
+  .periodic-grid { gap: 1px; }
+  .cell-number { font-size: 0.38rem; padding: 1px 2px; }
+  .cell-symbol { font-size: clamp(0.5rem, 1.8vw, 0.9rem); }
+  .cell-name   { font-size: clamp(0.25rem, 0.9vw, 0.45rem); }
+  .cell-prop   { display: none; } /* hide mass on mobile to save space */
+  .legend-bar  { gap: 4px; }
+  .legend-item { font-size: 0.55rem; padding: 2px 6px; }
+
+  /* Atom viewer */
+  #view-atom { flex-direction: column !important; }
+  #atom-canvas-container { height: 52vw; min-height: 220px; }
+  .atom-info-panel {
+    width: 100% !important; min-width: unset !important;
+    padding: 14px 12px; max-height: 44vh; overflow-y: auto;
+    border-left: none; border-top: 1px solid var(--bdr);
+  }
+  .el-card-symbol { font-size: 3.8rem !important; }
+  .el-card-name   { font-size: 0.85rem !important; letter-spacing: 2px; }
+  .stat-grid      { grid-template-columns: 1fr 1fr; gap: 5px; }
+  .stat-value     { font-size: 0.72rem; }
+  .atom-overlay-controls { gap: 4px; }
+  .atom-ctrl-btn  { width: 30px; height: 30px; font-size: 0.75rem; }
+  .btn-secondary  { font-size: 0.6rem; padding: 6px 10px; }
+  .btn-primary    { font-size: 0.65rem; padding: 10px; letter-spacing: 1px; }
+  .el-nav-btn     { width: 26px; height: 26px; font-size: 0.7rem; }
+  .orbital-diagram { bottom: auto; top: 16px; left: 50%; transform: translateX(-50%); min-width: 180px; }
+  .energy-diagram  { bottom: auto; top: 16px; left: 10px; transform: none; }
+
+  /* Home */
+  .home-atom-preview { width: 100px; height: 100px; margin-bottom: 16px; }
+  .home-atom-ring { display: none; } /* hide rings on mobile for perf */
+  .home-title .t-big, .home-title .t-glow { font-size: clamp(1.8rem,10vw,3rem); letter-spacing: 2px; }
+  .home-sub { font-size: 0.65rem; letter-spacing: 1px; margin-bottom: 24px; }
+  .home-cards { gap: 10px; padding: 0 8px; }
+  .home-card { width: calc(50% - 5px); padding: 14px 12px; }
+  .hc-icon { font-size: 1.4rem; }
+  .hc-title { font-size: 0.62rem; letter-spacing: 1px; }
+  .hc-desc { font-size: 0.65rem; }
+  .hc-num { font-size: 0.52rem; }
+  .hc-arrow { display: none; }
+
+  /* AR mode — hide non-essential HUD */
+  .hud-bl { display: none; }
+  .hud-br { display: none; }
+  .ar-bottom { gap: 6px; }
+  .ar-btn { font-size: 0.58rem; padding: 7px 12px; }
+  .ar-el-nav { bottom: 60px; }
+  .gesture-guide { padding: 12px 16px; top: 70px; }
+  .gg-title { font-size: 0.7rem; }
+  .gg-sub { font-size: 0.6rem; }
+
+  /* Molecule builder */
+  .mol-toolbar { top: 8px; gap: 4px; padding: 6px 8px; max-width: calc(100vw - 16px); overflow-x: auto; }
+  .mol-element-btn { width: 40px; height: 40px; }
+  .mol-el-sym { font-size: 0.85rem; }
+  .mol-preset-bar { gap: 5px; padding: 6px 10px; max-width: calc(100vw - 16px); overflow-x: auto; }
+  .mol-preset-btn { font-size: 0.58rem; padding: 5px 10px; }
+  .mol-info-panel { display: none; }
+
+  /* Playground */
+  .playground-toolbar { gap: 6px; padding: 10px 12px; max-width: calc(100vw - 16px); flex-wrap: wrap; justify-content: center; bottom: 12px; }
+  .pg-btn { font-size: 0.58rem; padding: 7px 12px; }
+  .pg-hud { font-size: 0.58rem; }
+
+  /* Compare bar */
+  .compare-bar { padding: 10px 12px; gap: 8px; }
+  .compare-bar-title { font-size: 0.58rem; }
+  .compare-slot { min-width: 90px; font-size: 0.62rem; padding: 5px 8px; }
+
+  /* Modal */
+  .modal { padding: 18px 14px; }
+  .compare-grid { grid-template-columns: 1fr; gap: 16px; }
+
+  /* Toast */
+  .toast-container { right: 10px; bottom: 80px; max-width: calc(100vw - 20px); }
+  .toast { font-size: 0.65rem; padding: 8px 14px; }
+
+  /* Tooltip */
+  .el-tooltip { font-size: 0.65rem; padding: 10px 12px; min-width: 150px; }
+  .et-sym { font-size: 1.5rem; }
+}
+
+/* ---- Very small phones (≤380px) ---- */
+@media (max-width: 380px) {
+  .nav-tab { font-size: 0.52rem; padding: 4px 6px; }
+  .home-card { width: calc(50% - 4px); padding: 12px 8px; }
+  .hc-title { font-size: 0.58rem; }
+  .cell-symbol { font-size: clamp(0.45rem, 1.9vw, 0.8rem); }
+  .periodic-grid { gap: 1px; }
+  .el-card-symbol { font-size: 3rem !important; }
+}
+
+/* ---- Landscape phone ---- */
+@media (max-width: 900px) and (orientation: landscape) {
+  #atom-canvas-container { height: 55vh; }
+  .atom-info-panel { max-height: 38vh; }
+  .home-atom-preview { width: 80px; height: 80px; margin-bottom: 12px; }
+  .home-title .t-big, .home-title .t-glow { font-size: clamp(1.5rem, 6vh, 2.5rem); }
+  .home-sub { display: none; }
+  .home-cards { gap: 8px; }
+  .home-card { width: 140px; padding: 12px 10px; }
+  nav { height: 46px; }
+  .view { padding-top: 46px; }
+}
+
+/* ---- Touch device improvements ---- */
+@media (hover: none) {
+  /* Remove hover effects that don't make sense on touch */
+  .element-cell:hover:not(.cell-empty) { transform: scale(1.05); }
+  .home-card:hover { transform: translateY(-4px); }
+  /* Larger tap targets */
+  .nav-tab { min-height: 36px; display: flex; align-items: center; justify-content: center; }
+  .mol-element-btn, .atom-ctrl-btn { min-width: 36px; min-height: 36px; }
+  /* Prevent double-tap zoom */
+  * { touch-action: manipulation; }
+  canvas { touch-action: none; }
+}
 </style>
 </head>
 <body>
@@ -709,10 +1169,12 @@ nav {
     <span class="l1">ATOM</span><div class="dot"></div><span class="l2">SPACE</span>
   </div>
   <div class="nav-tabs">
-    <button class="nav-tab" data-view="home"     onclick="showView('home')">HOME</button>
-    <button class="nav-tab" data-view="table"    onclick="showView('table')">TABLE</button>
-    <button class="nav-tab" data-view="atom"     onclick="showView('atom')">VIEWER</button>
-    <button class="nav-tab" data-view="ar"       onclick="showView('ar')">AR MODE</button>
+    <button class="nav-tab" data-view="home"       onclick="showView('home')">HOME</button>
+    <button class="nav-tab" data-view="table"      onclick="showView('table')">TABLE</button>
+    <button class="nav-tab" data-view="atom"       onclick="showView('atom')">VIEWER</button>
+    <button class="nav-tab" data-view="molecule"   onclick="showView('molecule')">MOLECULE</button>
+    <button class="nav-tab" data-view="playground" onclick="showView('playground')">PLAYGROUND</button>
+    <button class="nav-tab" data-view="ar"         onclick="showView('ar')">AR MODE</button>
   </div>
   <div class="nav-right">
     <div class="nav-clock" id="nav-clock"></div>
@@ -740,25 +1202,39 @@ nav {
       <span class="t-glow">SPACE</span>
     </div>
     <p class="home-sub">
-      118 ELEMENTS · 3D ATOM VISUALIZATION · GESTURE CONTROL · AR MODE
+      118 ELEMENTS &nbsp;·&nbsp; 3D PHYSICS &nbsp;·&nbsp; MOLECULE BUILDER &nbsp;·&nbsp; GESTURE CONTROL &nbsp;·&nbsp; AR MODE
     </p>
     <div class="home-cards">
       <div class="home-card" onclick="showView('table')">
         <div class="hc-num">01 / EXPLORE</div>
         <div class="hc-icon">⊞</div>
         <div class="hc-title">PERIODIC TABLE</div>
-        <div class="hc-desc">All 118 elements with atomic data, category filtering, and element comparison.</div>
+        <div class="hc-desc">All 118 elements with atomic data, filtering, and element comparison.</div>
         <div class="hc-arrow">→</div>
       </div>
       <div class="home-card" onclick="showView('atom')">
         <div class="hc-num">02 / VISUALIZE</div>
         <div class="hc-icon">◎</div>
         <div class="hc-title">3D ATOM VIEWER</div>
-        <div class="hc-desc">Real-time electron orbital models with glowing nucleus, trails, and particle physics.</div>
+        <div class="hc-desc">Real-time electron orbital models with physics, trails and excitation.</div>
+        <div class="hc-arrow">→</div>
+      </div>
+      <div class="home-card" onclick="showView('molecule')">
+        <div class="hc-num">03 / BUILD</div>
+        <div class="hc-icon">⬡</div>
+        <div class="hc-title">MOLECULE BUILDER</div>
+        <div class="hc-desc">Combine atoms into H₂O, CO₂, CH₄ and more. Watch bonds form live.</div>
+        <div class="hc-arrow">→</div>
+      </div>
+      <div class="home-card" onclick="showView('playground')">
+        <div class="hc-num">04 / PLAY</div>
+        <div class="hc-icon">✦</div>
+        <div class="hc-title">PLAYGROUND</div>
+        <div class="hc-desc">Physics sandbox — throw atoms, trigger explosions, distort orbits.</div>
         <div class="hc-arrow">→</div>
       </div>
       <div class="home-card" onclick="showView('ar')">
-        <div class="hc-num">03 / INTERACT</div>
+        <div class="hc-num">05 / INTERACT</div>
         <div class="hc-icon">◈</div>
         <div class="hc-title">AR GESTURE MODE</div>
         <div class="hc-desc">Control atoms with your hands. Pinch to zoom, wave to rotate, push electrons.</div>
@@ -821,6 +1297,8 @@ nav {
       <button class="atom-ctrl-btn" id="btn-wireframe" onclick="toggleWireframe()" title="Wireframe mode">⬡</button>
       <button class="atom-ctrl-btn" id="btn-explode" onclick="toggleExplode()" title="Explode view">✦</button>
       <button class="atom-ctrl-btn" id="btn-sound" onclick="toggleSound()" title="Sound effects">♪</button>
+      <button class="atom-ctrl-btn" id="btn-energy" onclick="toggleEnergyDiagram()" title="Energy levels">⚡</button>
+      <button class="atom-ctrl-btn" id="btn-excite" onclick="exciteElectron()" title="Excite electron">↑e⁻</button>
     </div>
 
     <!-- Orbital diagram overlay -->
@@ -828,6 +1306,15 @@ nav {
       <div class="od-title">ELECTRON SHELLS</div>
       <div class="od-shells" id="od-shells"></div>
     </div>
+
+    <!-- Energy level diagram -->
+    <div class="energy-diagram" id="energy-diagram">
+      <div class="ed-title">ENERGY LEVELS</div>
+      <div id="ed-levels"></div>
+    </div>
+
+    <!-- Excitation indicator -->
+    <div class="excitation-indicator" id="excitation-indicator"></div>
 
     <!-- Interaction hint -->
     <div style="position:absolute;bottom:20px;right:20px;font-family:var(--fm);font-size:0.6rem;color:var(--t3);text-align:right;pointer-events:none;">
@@ -852,7 +1339,10 @@ nav {
 
     <div id="el-detail-content"></div>
 
-    <button class="btn-primary" onclick="showView('ar')" style="margin-top:auto;">◈ LAUNCH AR MODE</button>
+    <div style="display:flex;gap:8px;margin-top:auto;">
+      <button class="btn-primary" onclick="showView('ar')" style="flex:1;">◈ AR MODE</button>
+      <button class="btn-primary" onclick="showView('molecule')" style="flex:1;background:linear-gradient(135deg,rgba(168,85,247,0.18),rgba(0,245,255,0.08));border-color:var(--np);color:var(--np);">⬡ MOLECULE</button>
+    </div>
   </div>
 </div>
 
@@ -916,6 +1406,9 @@ nav {
   <!-- Gesture ring & label -->
   <div class="gesture-ring" id="gesture-ring"></div>
   <div class="gesture-label" id="gesture-label"></div>
+  <!-- Hand cursor rings (one per hand) -->
+  <div class="ar-hand-ring" id="hand-ring-0" style="width:40px;height:40px;display:none;"></div>
+  <div class="ar-hand-ring" id="hand-ring-1" style="width:40px;height:40px;display:none;border-color:rgba(168,85,247,0.8);box-shadow:0 0 12px rgba(168,85,247,0.5);"></div>
 
   <!-- Guide -->
   <div class="gesture-guide" id="gesture-guide">
@@ -944,8 +1437,102 @@ nav {
 </div>
 
 <!-- ============================
-     ELEMENT DATA + SCRIPTS
+     MOLECULE BUILDER VIEW
      ============================ -->
+<div id="view-molecule" class="view">
+  <div id="mol-canvas-wrap">
+    <canvas id="mol-canvas"></canvas>
+
+    <!-- Toolbar -->
+    <div class="mol-toolbar">
+      <div style="font-family:var(--fm);font-size:0.6rem;color:var(--t3);letter-spacing:2px;margin-right:4px;">ADD</div>
+      <button class="mol-element-btn" data-el="H"  onclick="molSelectElement('H')">
+        <span class="mol-el-sym" style="color:#00f5ff">H</span><span class="mol-el-name">Hydrogen</span>
+      </button>
+      <button class="mol-element-btn" data-el="O"  onclick="molSelectElement('O')">
+        <span class="mol-el-sym" style="color:#ff4444">O</span><span class="mol-el-name">Oxygen</span>
+      </button>
+      <button class="mol-element-btn" data-el="C"  onclick="molSelectElement('C')">
+        <span class="mol-el-sym" style="color:#aaaaaa">C</span><span class="mol-el-name">Carbon</span>
+      </button>
+      <button class="mol-element-btn" data-el="N"  onclick="molSelectElement('N')">
+        <span class="mol-el-sym" style="color:#4488ff">N</span><span class="mol-el-name">Nitrogen</span>
+      </button>
+      <button class="mol-element-btn" data-el="S"  onclick="molSelectElement('S')">
+        <span class="mol-el-sym" style="color:#ffdd00">S</span><span class="mol-el-name">Sulfur</span>
+      </button>
+      <button class="mol-element-btn" data-el="Na" onclick="molSelectElement('Na')">
+        <span class="mol-el-sym" style="color:#ff7744">Na</span><span class="mol-el-name">Sodium</span>
+      </button>
+      <div class="mol-sep"></div>
+      <button class="mol-action-btn" onclick="molClearAll()"><span class="icon">🗑</span><span>CLEAR</span></button>
+      <button class="mol-action-btn" id="mol-auto-bond-btn" onclick="molToggleAutoBond()"><span class="icon">⚡</span><span>AUTO BOND</span></button>
+      <button class="mol-action-btn" onclick="molSpawnSelected()"><span class="icon">✦</span><span>SPAWN</span></button>
+    </div>
+
+    <!-- Preset molecules -->
+    <div class="mol-preset-bar">
+      <div style="font-family:var(--fm);font-size:0.6rem;color:var(--t3);letter-spacing:2px;margin-right:4px;">PRESETS</div>
+      <button class="mol-preset-btn" onclick="molLoadPreset('H2O')">H₂O</button>
+      <button class="mol-preset-btn" onclick="molLoadPreset('CO2')">CO₂</button>
+      <button class="mol-preset-btn" onclick="molLoadPreset('CH4')">CH₄</button>
+      <button class="mol-preset-btn" onclick="molLoadPreset('NH3')">NH₃</button>
+      <button class="mol-preset-btn" onclick="molLoadPreset('NaCl')">NaCl</button>
+      <button class="mol-preset-btn" onclick="molLoadPreset('O2')">O₂</button>
+    </div>
+
+    <!-- Info panel -->
+    <div class="mol-info-panel" id="mol-info">
+      <div class="mol-info-title">MOLECULE INFO</div>
+      <div id="mol-info-content">
+        <div style="font-family:var(--fm);font-size:0.65rem;color:var(--t3);">
+          Select a preset or add atoms manually.<br><br>
+          Atoms within bonding distance will auto-connect.
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div style="position:absolute;bottom:70px;left:20px;font-family:var(--fm);font-size:0.6rem;color:var(--t3);z-index:20;">
+      CLICK + DRAG to move atoms · SCROLL to zoom · Atoms auto-bond when close
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     PLAYGROUND VIEW
+     ============================ -->
+<div id="view-playground" class="view" style="position:relative;">
+  <canvas id="playground-canvas"></canvas>
+
+  <!-- HUD -->
+  <div class="pg-hud">
+    <div class="pg-hud-line">ATOMS: <span id="pg-atom-count">0</span></div>
+    <div class="pg-hud-line">FPS: <span id="pg-fps">—</span></div>
+    <div class="pg-hud-line">GRAVITY: <span id="pg-grav-label">ON</span></div>
+    <div class="pg-hud-line">COLLISION: <span id="pg-coll-label">ON</span></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="playground-toolbar">
+    <button class="pg-btn" onclick="pgSpawnAtom()">✦ SPAWN ATOM</button>
+    <button class="pg-btn" onclick="pgSpawnRandom(5)">⊞ SPAWN ×5</button>
+    <div class="mol-sep"></div>
+    <button class="pg-btn" id="pg-grav-btn" onclick="pgToggleGravity()">⊙ GRAVITY</button>
+    <button class="pg-btn" id="pg-coll-btn" onclick="pgToggleCollisions()">◈ COLLISIONS</button>
+    <button class="pg-btn" onclick="pgExplodeAll()">💥 EXPLODE</button>
+    <div class="mol-sep"></div>
+    <button class="pg-btn" onclick="pgClear()">🗑 CLEAR</button>
+    <div class="pg-physics-badge" id="pg-badge">PHYSICS SIM</div>
+  </div>
+
+  <!-- Click hint -->
+  <div style="position:absolute;top:72px;right:20px;font-family:var(--fm);font-size:0.6rem;color:var(--t3);text-align:right;z-index:20;">
+    CLICK to launch atom · DRAG to push · SCROLL to zoom
+  </div>
+</div>
+
+
 <script>
 // ============================================================
 //  ELEMENT DATABASE — ALL 118 ELEMENTS
@@ -1228,16 +1815,30 @@ function showView(name) {
   if (!view) return;
   view.classList.add('active');
   view.classList.remove('view-enter');
-  void view.offsetWidth; // reflow
+  void view.offsetWidth;
   view.classList.add('view-enter');
 
-  const tab = document.querySelector(`.nav-tab[data-view="${name}"]`);
+  const tab = document.querySelector('.nav-tab[data-view="'+name+'"]');
   if (tab) tab.classList.add('active');
 
-  if (name === 'atom')  { initAtomViewer(); }
-  if (name === 'ar')    { initARMode(); }
-  if (name === 'table') { buildPeriodicTable(); }
-  if (name === 'home')  { initHomeViewer(); }
+  // Sync mobile bottom nav
+  document.querySelectorAll('#mobile-nav button[data-mview]').forEach(b => {
+    const on = b.dataset.mview === name;
+    b.style.color      = on ? '#00f5ff' : '#3a6880';
+    b.style.textShadow = on ? '0 0 8px rgba(0,245,255,0.5)' : 'none';
+  });
+
+  // Stop AR camera when leaving
+  if (name !== 'ar' && arStream) {
+    arStream.getTracks().forEach(t => t.stop()); arStream = null;
+  }
+
+  if (name === 'atom')       { initAtomViewer(); }
+  if (name === 'ar')         { initARMode(); }
+  if (name === 'table')      { buildPeriodicTable(); }
+  if (name === 'home')       { initHomeViewer(); }
+  if (name === 'molecule')   { setTimeout(initMoleculeBuilder, 60); }
+  if (name === 'playground') { setTimeout(initPlayground, 60); }
 
   playClickSound();
 }
@@ -1696,156 +2297,139 @@ function toggleSound() {
 //  THREE.JS ATOM GEOMETRY BUILDER
 // ============================================================
 function buildAtomGeometry(group, electrons, el) {
-  // Clear
   while(group.children.length) group.remove(group.children[0]);
   electrons.length = 0;
 
-  const shells = el.shells||[1];
-  const elColor = new THREE.Color(el.color||'#00f5ff');
+  const shells     = el.shells || [1];
+  const elColor    = new THREE.Color(el.color || '#00f5ff');
+  const isMobile   = window.innerWidth < 600;
+  const hiQ        = !isMobile;
 
-  // ---- NUCLEUS ----
+  // ── NUCLEUS ──────────────────────────────────────────
   const nucleusGroup = new THREE.Group();
-  nucleusGroup.name = 'nucleus';
+  nucleusGroup.name  = 'nucleus';
   const protons  = el.n;
   const neutrons = Math.max(0, Math.round((el.mass||el.n) - el.n));
   const nucleons = protons + neutrons;
-  const nucleusRadius = 0.12 * Math.cbrt(Math.max(nucleons, 1)) * 0.8 + 0.2;
+  const nR       = 0.10 * Math.cbrt(Math.max(nucleons,1)) * 0.9 + 0.22;
+  const maxNuc   = isMobile ? 18 : 50;
 
-  // Pack nucleons using Fibonacci sphere
-  for(let i=0; i<Math.min(nucleons, 60); i++) {
-    const isProton = i < protons;
-    const geo = new THREE.SphereGeometry(0.10 + Math.random()*0.03, 10, 10);
-    const mat = new THREE.MeshPhongMaterial({
-      color:    isProton ? 0xff3333 : 0x3355ff,
-      emissive: isProton ? 0x881111 : 0x112266,
-      shininess: 90, specular: 0x888888,
-    });
-    const sphere = new THREE.Mesh(geo, mat);
-    const phi   = Math.acos(-1 + (2*i) / Math.max(nucleons,1));
-    const theta = Math.sqrt(nucleons * Math.PI) * phi;
-    const r     = nucleusRadius * (0.7 + Math.random()*0.3);
-    sphere.position.set(
-      r * Math.cos(theta) * Math.sin(phi),
-      r * Math.sin(theta) * Math.sin(phi),
-      r * Math.cos(phi)
-    );
-    sphere.rotation.set(Math.random()*6, Math.random()*6, Math.random()*6);
-    nucleusGroup.add(sphere);
+  for(let i=0; i<Math.min(nucleons, maxNuc); i++) {
+    const isP = i < protons;
+    const seg = hiQ ? 10 : 7;
+    const geo = new THREE.SphereGeometry(0.09 + Math.random()*0.025, seg, seg);
+    const col = isP ? new THREE.Color(0xff5533) : new THREE.Color(0x3366ff);
+    const emi = isP ? new THREE.Color(0x661100) : new THREE.Color(0x001155);
+    const mat = new THREE.MeshPhongMaterial({ color:col, emissive:emi, shininess:100, specular:0x444444 });
+    const s   = new THREE.Mesh(geo, mat);
+    const phi = Math.acos(-1 + (2*i)/Math.max(nucleons,1));
+    const th  = Math.sqrt(nucleons*Math.PI)*phi;
+    const r   = nR*(0.6 + Math.random()*0.38);
+    s.position.set(r*Math.cos(th)*Math.sin(phi), r*Math.sin(th)*Math.sin(phi), r*Math.cos(phi));
+    nucleusGroup.add(s);
   }
 
-  // Nucleus core glow sphere
-  const glowGeo = new THREE.SphereGeometry(nucleusRadius*1.3, 20, 20);
-  const glowMat = new THREE.MeshBasicMaterial({
-    color: elColor, transparent: true, opacity: 0.07, side: THREE.BackSide
+  // Multi-layer nucleus glow
+  [{scale:1.15,op:0.22,side:THREE.FrontSide},{scale:1.55,op:0.09,side:THREE.BackSide},{scale:2.2,op:0.04,side:THREE.BackSide}].forEach(({scale,op,side})=>{
+    const g = new THREE.SphereGeometry(nR*scale,16,16);
+    const m = new THREE.MeshBasicMaterial({color:elColor,transparent:true,opacity:op,side,blending:THREE.AdditiveBlending,depthWrite:false});
+    nucleusGroup.add(new THREE.Mesh(g,m));
   });
-  nucleusGroup.add(new THREE.Mesh(glowGeo, glowMat));
 
-  // Outer nucleus pulse sphere
-  const pulseGeo = new THREE.SphereGeometry(nucleusRadius*1.8, 16, 16);
-  const pulseMat = new THREE.MeshBasicMaterial({
-    color: elColor, transparent: true, opacity: 0.03, wireframe: true
-  });
-  const pulseMesh = new THREE.Mesh(pulseGeo, pulseMat);
-  pulseMesh.name = 'nucleus-pulse';
+  // Pulsing wireframe
+  const pulseMat  = new THREE.MeshBasicMaterial({color:elColor,transparent:true,opacity:0.04,wireframe:true});
+  const pulseMesh = new THREE.Mesh(new THREE.SphereGeometry(nR*1.9,14,14), pulseMat);
+  pulseMesh.name  = 'nucleus-pulse';
   nucleusGroup.add(pulseMesh);
-
   group.add(nucleusGroup);
 
-  // ---- ELECTRON SHELLS ----
-  const shellColors = [
-    '#00f5ff','#44aaff','#aa55ff','#ff44aa','#ff8844','#ffdd00','#44ff88'
-  ];
-  const shellTilts = [
-    {x: Math.PI/2,   y: 0},
-    {x: Math.PI/3,   y: Math.PI/4},
-    {x: Math.PI/6,   y: Math.PI/3},
-    {x: Math.PI*0.8, y: Math.PI/6},
-    {x: Math.PI/4,   y: Math.PI*0.7},
-    {x: Math.PI*0.6, y: Math.PI/2},
-    {x: Math.PI/3,   y: Math.PI},
+  // ── ELECTRON SHELLS ───────────────────────────────────
+  const SHELL_HUES  = [185,210,270,330,20,55,120];
+  const SHELL_TILTS = [
+    {rx:Math.PI*0.5, ry:0},           {rx:Math.PI*0.3, ry:Math.PI*0.4},
+    {rx:Math.PI*0.1, ry:Math.PI*0.3}, {rx:Math.PI*0.8, ry:Math.PI*0.15},
+    {rx:Math.PI*0.25,ry:Math.PI*0.7}, {rx:Math.PI*0.6, ry:Math.PI*0.5},
+    {rx:Math.PI*0.35,ry:Math.PI},
   ];
 
-  shells.forEach((count, shellIdx) => {
-    const radius      = nucleusRadius*2.2 + shellIdx * 1.4 + 1.0;
-    const colHex      = shellColors[shellIdx % shellColors.length];
-    const shellColor  = new THREE.Color(colHex);
-    const tilt        = shellTilts[shellIdx % shellTilts.length];
-    const speed       = 0.45 / (shellIdx*0.4+1);
+  shells.forEach((count, si) => {
+    const radius  = nR*2.3 + si*1.45 + 1.1;
+    const hue     = SHELL_HUES[si % SHELL_HUES.length];
+    const shellCol= new THREE.Color(`hsl(${hue},100%,65%)`);
+    const tilt    = SHELL_TILTS[si % SHELL_TILTS.length];
+    const speed   = 0.50 / (si*0.42+1);
+    const rSeg    = hiQ ? 130 : 64;
 
-    // Orbit ring (torus)
-    const ringGeo = new THREE.TorusGeometry(radius, 0.015, 8, 120);
-    const ringMat = new THREE.MeshBasicMaterial({ color: shellColor, transparent: true, opacity: 0.25 });
-    const ring    = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = tilt.x;
-    ring.rotation.y = tilt.y;
-    ring.name = 'ring';
-    group.add(ring);
+    // 3-layer glowing orbital ring
+    [[0.018,0.55],[0.07,0.09],[0.20,0.025]].forEach(([tube,op])=>{
+      const geo = new THREE.TorusGeometry(radius, tube, tube>0.1?4:8, rSeg);
+      const mat = new THREE.MeshBasicMaterial({color:shellCol,transparent:true,opacity:op,blending:THREE.AdditiveBlending,depthWrite:false});
+      const ring = new THREE.Mesh(geo,mat);
+      ring.rotation.x = tilt.rx; ring.rotation.y = tilt.ry;
+      ring.name = tube===0.018 ? 'ring' : '';
+      ring.userData = {glowRing:true, shellIdx:si, shellCol, tiltRx:tilt.rx, tiltRy:tilt.ry};
+      group.add(ring);
+    });
 
-    // Dashed secondary ring (smaller)
-    const ring2Geo = new THREE.TorusGeometry(radius, 0.006, 6, 80);
-    const ring2Mat = new THREE.MeshBasicMaterial({ color: shellColor, transparent: true, opacity: 0.12 });
-    const ring2    = new THREE.Mesh(ring2Geo, ring2Mat);
-    ring2.rotation.x = tilt.x + 0.3;
-    ring2.rotation.y = tilt.y + 0.5;
-    group.add(ring2);
-
-    // Electrons for this shell
+    // Electrons
     const eCount = Math.min(count, 8);
-    for(let e=0; e<eCount; e++) {
-      const baseAngle = (e / eCount) * Math.PI * 2;
-
-      // Electron sphere
-      const eGeo = new THREE.SphereGeometry(0.095, 10, 10);
+    for(let ei=0; ei<eCount; ei++) {
+      const baseAngle = (ei/eCount)*Math.PI*2;
+      const eSeg = hiQ ? 12 : 8;
+      const eGeo = new THREE.SphereGeometry(0.115, eSeg, eSeg);
       const eMat = new THREE.MeshPhongMaterial({
-        color: shellColor, emissive: shellColor, emissiveIntensity: 0.7, shininess: 120,
+        color:shellCol, emissive:shellCol, emissiveIntensity:1.3,
+        shininess:220, specular:new THREE.Color(0xffffff), transparent:false,
       });
       const electron = new THREE.Mesh(eGeo, eMat);
       electron.userData = {
-        type: 'electron', shell: shellIdx, idx: e,
-        baseAngle, radius, speed,
-        tiltX: tilt.x, tiltY: tilt.y,
-        velocityBoost: 0,
+        type:'electron', shell:si, idx:ei,
+        baseAngle, radius, speed, tiltX:tilt.rx, tiltY:tilt.ry,
+        velocityBoost:0, shellCol,
       };
       group.add(electron);
       electrons.push(electron);
 
-      // Trail spheres (3 per electron)
-      for(let t=1; t<=4; t++) {
-        const ts   = 0.085 - t*0.015;
-        const tGeo = new THREE.SphereGeometry(Math.max(ts,0.02), 7, 7);
-        const tMat = new THREE.MeshBasicMaterial({ color: shellColor, transparent: true, opacity: 0.32/t });
-        const trail = new THREE.Mesh(tGeo, tMat);
-        trail.userData = {
-          type: 'trail', parentElectron: electron, trailOffset: t * 0.22,
-        };
-        group.add(trail);
-        electrons.push(trail);
+      // Electron glow halo
+      const hGeo = new THREE.SphereGeometry(0.30,8,8);
+      const hMat = new THREE.MeshBasicMaterial({color:shellCol,transparent:true,opacity:0.20,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.BackSide});
+      const halo = new THREE.Mesh(hGeo,hMat);
+      halo.userData = {type:'trail',parentElectron:electron,trailOffset:0,isHalo:true};
+      group.add(halo); electrons.push(halo);
+
+      // Trail chain
+      const tCount = hiQ ? 5 : 3;
+      for(let t=1; t<=tCount; t++) {
+        const ts  = Math.max(0.025, 0.09-t*0.013);
+        const tGeo= new THREE.SphereGeometry(ts,6,6);
+        const tMat= new THREE.MeshBasicMaterial({color:shellCol,transparent:true,opacity:0.5*Math.pow(0.62,t),blending:THREE.AdditiveBlending,depthWrite:false});
+        const tr  = new THREE.Mesh(tGeo,tMat);
+        tr.userData = {type:'trail',parentElectron:electron,trailOffset:t*0.25};
+        group.add(tr); electrons.push(tr);
       }
     }
   });
 
-  // ---- AMBIENT PARTICLE CLOUD ----
-  const pCount = 350;
-  const pGeo   = new THREE.BufferGeometry();
-  const pPos   = new Float32Array(pCount * 3);
-  const pSizes = new Float32Array(pCount);
-  for(let i=0; i<pCount; i++) {
-    const r     = (shells.length*1.5 + 1.5) + Math.random()*4;
-    const theta = Math.random() * Math.PI * 2;
-    const phi   = Math.random() * Math.PI;
-    pPos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
-    pPos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
-    pPos[i*3+2] = r * Math.cos(phi);
-    pSizes[i]   = 0.02 + Math.random()*0.04;
+  // ── AMBIENT PARTICLE CLOUD ───────────────────────────
+  const pCount = isMobile ? 160 : 380;
+  const pPos   = new Float32Array(pCount*3);
+  const baseR  = shells.length*1.5 + 2.0;
+  for(let i=0;i<pCount;i++){
+    const r=baseR+Math.random()*5, th=Math.random()*Math.PI*2, ph=Math.random()*Math.PI;
+    pPos[i*3]=r*Math.sin(ph)*Math.cos(th); pPos[i*3+1]=r*Math.sin(ph)*Math.sin(th); pPos[i*3+2]=r*Math.cos(ph);
   }
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-  const pMat  = new THREE.PointsMaterial({ color: elColor, size: 0.05, transparent: true, opacity: 0.45, sizeAttenuation: true });
-  const pts   = new THREE.Points(pGeo, pMat);
-  pts.name    = 'particles';
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+  const pMat = new THREE.PointsMaterial({color:elColor,size:isMobile?0.065:0.055,transparent:true,opacity:0.5,sizeAttenuation:true,blending:THREE.AdditiveBlending,depthWrite:false});
+  const pts  = new THREE.Points(pGeo,pMat);
+  pts.name   = 'particles';
   group.add(pts);
-  group.userData.particles = pts;
-  group.userData.elColor   = elColor;
-  group.userData.nucleusRadius = nucleusRadius;
+  group.userData.particles     = pts;
+  group.userData.elColor       = elColor;
+  group.userData.nucleusRadius = nR;
+
+  buildEnergyParticleField(group, el, shells.length);
+  initElectronPhysics(electrons);
 }
 
 function rebuildAtomGeometry(group, electrons, el) {
@@ -1861,64 +2445,102 @@ function animateAtom(group, electrons, time) {
   // Pulse nucleus
   const pulse = group.getObjectByName('nucleus-pulse');
   if(pulse) {
-    const sc = 1 + Math.sin(t*2)*0.06;
+    const sc = 1 + Math.sin(t*2.2)*0.07;
     pulse.scale.setScalar(sc);
-    pulse.material.opacity = 0.03 + Math.sin(t*2)*0.015;
+    pulse.material.opacity = 0.03 + Math.sin(t*2.2)*0.018;
+  }
+
+  // Nucleus inner glow breathe
+  const nucGroup = group.getObjectByName('nucleus');
+  if(nucGroup) {
+    nucGroup.rotation.y += 0.004;
+    nucGroup.rotation.x += 0.002;
   }
 
   // Explode factor easing
-  if(explodeMode) { explodeFactor = Math.min(1, explodeFactor + 0.02); }
-  else            { explodeFactor = Math.max(0, explodeFactor - 0.02); }
+  if(explodeMode) { explodeFactor = Math.min(1, explodeFactor + 0.025); }
+  else            { explodeFactor = Math.max(0, explodeFactor - 0.025); }
 
   electrons.forEach(obj => {
     const d = obj.userData;
     if(d.type === 'electron') {
-      const boost = (d.velocityBoost || 0);
-      const angle  = d.baseAngle + t * (d.speed + boost);
-      d.baseAngle += boost * 0.05;
-      d.velocityBoost = boost * 0.92; // damping
+      const boost = d.velocityBoost || 0;
+      const angle = d.baseAngle + t * (d.speed + Math.abs(boost)*0.1);
+      d.baseAngle     += boost * 0.04;
+      d.velocityBoost  = boost * 0.91;
 
+      // Orbital trig (correct 3D rotation)
       const ca = Math.cos(angle), sa = Math.sin(angle);
-      const cy = Math.cos(d.tiltX), sy = Math.sin(d.tiltX);
-      const cz = Math.cos(d.tiltY), sz = Math.sin(d.tiltY);
+      const cx = Math.cos(d.tiltX), sx = Math.sin(d.tiltX);
+      const cy = Math.cos(d.tiltY), sy = Math.sin(d.tiltY);
+      const r  = (d.radius + explodeFactor * d.shell * 0.9);
 
-      const radius = d.radius + explodeFactor * d.shell * 0.8;
+      // Physics repel offset
+      const ph = d.physics;
+      const rx = ph ? ph.repelVelocity.x : 0;
+      const ry = ph ? ph.repelVelocity.y : 0;
+      const rz = ph ? ph.repelVelocity.z : 0;
+      const wob= ph ? ph.wobble * 0.04 : 0;
 
-      const lx = radius * ca;
-      const ly = radius * sa * cy - radius * 0 * sy;
-      const lz = radius * sa * sy + radius * 0 * cy;
+      const lx = r * ca;
+      const ly = r * sa * cx;
+      const lz = r * sa * sx;
+      obj.position.set(
+        lx*cy - lz*sy + rx,
+        ly      + ry,
+        lx*sy + lz*cy + rz
+      );
 
-      const wx = lx * cz - ly * sz;
-      const wy = lx * sz + ly * cz;
-
-      obj.position.set(wx, wy, lz);
+      // Pulse electron emissive — brighter when boosted
+      if(obj.material && obj.material.emissiveIntensity !== undefined) {
+        const targetEmi = 1.3 + Math.abs(boost)*4 + Math.sin(t*3+d.idx*1.5)*0.2;
+        obj.material.emissiveIntensity += (targetEmi - obj.material.emissiveIntensity)*0.15;
+      }
 
     } else if(d.type === 'trail') {
       const pe = d.parentElectron;
       if(!pe || !pe.userData) return;
       const pd = pe.userData;
-      const trailAngle = pd.baseAngle + t * pd.speed - d.trailOffset;
 
+      if(d.isHalo) {
+        // Halo follows electron exactly
+        obj.position.copy(pe.position);
+        if(obj.material) obj.material.opacity = 0.15 + Math.sin(t*4+pd.idx)*0.05;
+        return;
+      }
+
+      const trailAngle = pd.baseAngle + t*pd.speed - d.trailOffset;
       const ca = Math.cos(trailAngle), sa = Math.sin(trailAngle);
-      const cy = Math.cos(pd.tiltX), sy = Math.sin(pd.tiltX);
-      const cz = Math.cos(pd.tiltY), sz = Math.sin(pd.tiltY);
-
-      const radius = pd.radius + explodeFactor * pd.shell * 0.8;
-      const lx = radius * ca;
-      const ly = radius * sa * cy;
-      const lz = radius * sa * sy;
-      const wx = lx * cz - ly * sz;
-      const wy = lx * sz + ly * cz;
-      obj.position.set(wx, wy, lz);
+      const cx = Math.cos(pd.tiltX), sx = Math.sin(pd.tiltX);
+      const cy = Math.cos(pd.tiltY), sy = Math.sin(pd.tiltY);
+      const r  = pd.radius + explodeFactor * pd.shell * 0.9;
+      const lx = r*ca, ly = r*sa*cx, lz = r*sa*sx;
+      obj.position.set(lx*cy-lz*sy, ly, lx*sy+lz*cy);
     }
   });
 
-  // Rotate particles slowly
+  // Animate glowing orbital rings — pulse opacity in sync with electron pass
+  group.children.forEach(child => {
+    if(child.userData && child.userData.glowRing) {
+      const si  = child.userData.shellIdx;
+      const sc  = child.userData.shellCol;
+      if(child.material) {
+        const baseOp = child.geometry && child.geometry.parameters && child.geometry.parameters.tube > 0.1 ? 0.05 : (child.geometry && child.geometry.parameters && child.geometry.parameters.tube > 0.05 ? 0.09 : 0.55);
+        child.material.opacity = baseOp + Math.sin(t*(0.8+si*0.3))*baseOp*0.35;
+      }
+    }
+  });
+
+  // Particle cloud drift
   const pts = group.userData.particles;
   if(pts) {
-    pts.rotation.y = t * 0.08;
-    pts.rotation.z = t * 0.04;
+    pts.rotation.y  = t * 0.07;
+    pts.rotation.z  = t * 0.035;
+    if(pts.material) pts.material.opacity = 0.4 + Math.sin(t*1.2)*0.1;
   }
+
+  // Energy field
+  animateEnergyField(group, null, time);
 }
 
 // ============================================================
@@ -1930,26 +2552,37 @@ function initAtomViewer() {
 
   if(atomRenderer) { atomRenderer.dispose(); cancelAnimationFrame(atomFrame); atomRenderer=null; }
 
-  canvas.width  = container.clientWidth;
-  canvas.height = container.clientHeight;
+  // Mobile-safe sizing: wait for layout, use container or window fallback
+  const W = container.clientWidth  > 10 ? container.clientWidth  : window.innerWidth;
+  const H = container.clientHeight > 10 ? container.clientHeight : Math.round(window.innerHeight * 0.55);
+  canvas.width  = W;
+  canvas.height = H;
 
-  // Scene
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference:'high-performance' });
-  renderer.setSize(canvas.width, canvas.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const isMobile = window.innerWidth < 600;
+  const renderer = new THREE.WebGLRenderer({
+    canvas, antialias: !isMobile, alpha: true,
+    powerPreference: 'high-performance',
+  });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
   renderer.setClearColor(0x000000, 0);
+  renderer.shadowMap.enabled = false; // off for perf
 
   const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, canvas.width/canvas.height, 0.1, 500);
-  camera.position.set(0, 0, 10);
+  const camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 500);
+  camera.position.set(0, 0, isMobile ? 11 : 10);
 
-  // Lighting
-  scene.add(new THREE.AmbientLight(0x112244, 3));
-  const p1 = new THREE.PointLight(0x00f5ff, 4, 40); p1.position.set(0,8,6);  scene.add(p1);
-  const p2 = new THREE.PointLight(0x0055ff, 2, 30); p2.position.set(-6,-4,0); scene.add(p2);
-  const p3 = new THREE.PointLight(0xff2288, 1, 20); p3.position.set(6,-4,4);  scene.add(p3);
+  // Rich 4-light setup for visual depth
+  scene.add(new THREE.AmbientLight(0x0a1a33, 4));
+  // Key light — electric blue-cyan
+  const p1 = new THREE.PointLight(0x00ccff, 5, 50); p1.position.set(5, 8, 8);   scene.add(p1);
+  // Fill — deep purple
+  const p2 = new THREE.PointLight(0x5500ff, 3, 40); p2.position.set(-8,-4, 2);  scene.add(p2);
+  // Rim — hot pink
+  const p3 = new THREE.PointLight(0xff0066, 2, 30); p3.position.set(4,-6,-4);   scene.add(p3);
+  // Top soft white
+  const p4 = new THREE.PointLight(0x334466, 2, 60); p4.position.set(0, 14, 0);  scene.add(p4);
 
-  // Atom group
   const group = new THREE.Group();
   scene.add(group);
   const electrons = [];
@@ -1958,52 +2591,70 @@ function initAtomViewer() {
   atomRenderer = renderer; atomCamera = camera; atomScene_ = scene;
   atomGroup = group; atomElectrons = electrons;
 
-  // Mouse interaction
+  // Mouse proximity state
+  let mouseNX = 0.5, mouseNY = 0.5, mouseInCanvas = false;
   let prevX = 0, prevY = 0;
+
   canvas.addEventListener('mousedown', e => { isDraggingAtom=true; prevX=e.clientX; prevY=e.clientY; });
   canvas.addEventListener('mousemove', e => {
-    if(!isDraggingAtom) return;
-    const dx=e.clientX-prevX, dy=e.clientY-prevY;
-    atomGroup.rotation.y += dx*0.008;
-    atomGroup.rotation.x += dy*0.008;
-    prevX=e.clientX; prevY=e.clientY;
+    const rect = canvas.getBoundingClientRect();
+    mouseNX = (e.clientX - rect.left) / rect.width;
+    mouseNY = (e.clientY - rect.top)  / rect.height;
+    mouseInCanvas = true;
+    if(isDraggingAtom) {
+      atomGroup.rotation.y += (e.clientX-prevX)*0.008;
+      atomGroup.rotation.x += (e.clientY-prevY)*0.008;
+      prevX=e.clientX; prevY=e.clientY;
+    }
   });
-  window.addEventListener('mouseup', () => { isDraggingAtom=false; });
+  canvas.addEventListener('mouseleave', () => { mouseInCanvas=false; });
+  window.addEventListener('mouseup',   () => { isDraggingAtom=false; });
 
-  // Touch support
-  let lastTouchX=0, lastTouchY=0, lastTouchDist=0;
-  canvas.addEventListener('touchstart', e => {
-    if(e.touches.length===1){ lastTouchX=e.touches[0].clientX; lastTouchY=e.touches[0].clientY; }
-    if(e.touches.length===2){ lastTouchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY); }
-  });
-  canvas.addEventListener('touchmove', e => {
+  // Touch: single-finger rotate, two-finger pinch-zoom
+  let lastTX=0, lastTY=0, lastTDist=0;
+  canvas.addEventListener('touchstart', e=>{
+    if(e.touches.length===1){ lastTX=e.touches[0].clientX; lastTY=e.touches[0].clientY; }
+    if(e.touches.length===2){ lastTDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY); }
+  }, {passive:true});
+  canvas.addEventListener('touchmove', e=>{
     e.preventDefault();
     if(e.touches.length===1){
-      const dx=e.touches[0].clientX-lastTouchX, dy=e.touches[0].clientY-lastTouchY;
-      atomGroup.rotation.y+=dx*0.01; atomGroup.rotation.x+=dy*0.01;
-      lastTouchX=e.touches[0].clientX; lastTouchY=e.touches[0].clientY;
+      const dx=e.touches[0].clientX-lastTX, dy=e.touches[0].clientY-lastTY;
+      atomGroup.rotation.y += dx*0.012; atomGroup.rotation.x += dy*0.012;
+      lastTX=e.touches[0].clientX; lastTY=e.touches[0].clientY;
     }
     if(e.touches.length===2){
       const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-      const delta=d-lastTouchDist;
-      atomCamera.position.z=Math.max(3,Math.min(25,atomCamera.position.z-delta*0.04));
-      lastTouchDist=d;
+      atomCamera.position.z = Math.max(3, Math.min(25, atomCamera.position.z-(d-lastTDist)*0.05));
+      lastTDist=d;
     }
   }, {passive:false});
 
-  canvas.addEventListener('wheel', e => {
+  canvas.addEventListener('wheel', e=>{
     e.preventDefault();
-    atomCamera.position.z = Math.max(3, Math.min(25, atomCamera.position.z + e.deltaY*0.012));
+    atomCamera.position.z = Math.max(3, Math.min(25, atomCamera.position.z+e.deltaY*0.012));
   }, {passive:false});
 
   updateElementDisplay(currentElement);
 
+  let frameCount = 0;
   function loop(time) {
     atomFrame = requestAnimationFrame(loop);
-    animateAtom(atomGroup, atomElectrons, time);
-    if(autoRotate && !isDraggingAtom) {
-      atomGroup.rotation.y += 0.004;
+    frameCount++;
+
+    // Mouse → electron repulsion (skip every 2nd frame on mobile)
+    if(mouseInCanvas && !isDraggingAtom && !(isMobile && frameCount%2)) {
+      const ndc = new THREE.Vector2(mouseNX*2-1, -(mouseNY*2-1));
+      const vec = new THREE.Vector3(ndc.x, ndc.y, 0.5).unproject(camera);
+      const dir = vec.sub(camera.position).normalize();
+      const tv  = (0 - camera.position.z) / dir.z;
+      const mw  = camera.position.clone().add(dir.multiplyScalar(tv));
+      applyElectronPhysics(atomElectrons, mw, time, 4.0, 0.08);
+      if(group.userData.fieldPts) animateEnergyField(group, mw, time);
     }
+
+    animateAtom(atomGroup, atomElectrons, time);
+    if(autoRotate && !isDraggingAtom) atomGroup.rotation.y += 0.004;
     renderer.render(scene, camera);
   }
   loop(0);
@@ -2017,38 +2668,48 @@ function initHomeViewer() {
   if(!canvas) return;
   if(homeRenderer) { homeRenderer.dispose(); cancelAnimationFrame(homeFrame); homeRenderer=null; }
 
-  canvas.width = canvas.clientWidth || 180;
-  canvas.height = canvas.clientHeight || 180;
+  const isMobile = window.innerWidth < 600;
+  const size = isMobile ? 100 : 180;
+  canvas.width  = size;
+  canvas.height = size;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setSize(canvas.width, canvas.height);
-  renderer.setPixelRatio(window.devicePixelRatio);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:!isMobile, alpha:true });
+  renderer.setSize(size, size);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
   renderer.setClearColor(0,0);
 
   const scene  = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
-  camera.position.set(0,0,6);
+  camera.position.set(0, 0, 6);
 
   scene.add(new THREE.AmbientLight(0x112244, 3));
-  const pl = new THREE.PointLight(0x00f5ff, 5, 20); pl.position.set(0,3,4); scene.add(pl);
+  const pl  = new THREE.PointLight(0x00ccff, 5, 20); pl.position.set(0,3,4);  scene.add(pl);
+  const pl2 = new THREE.PointLight(0x5500ff, 2, 15); pl2.position.set(-3,-2,0); scene.add(pl2);
 
   const group = new THREE.Group(); scene.add(group);
   const electrons = [];
+  // Start with hydrogen
   buildAtomGeometry(group, electrons, ELEMENTS.find(e=>e.n===1));
   homeGroup=group; homeElectrons=electrons; homeRenderer=renderer;
 
-  // Cycle through elements
+  // Cycle through elements (slower on mobile to save CPU)
   let homeElIdx=0;
-  setInterval(()=>{
-    homeElIdx=(homeElIdx+1)%ELEMENTS.length;
+  const cycleMs = isMobile ? 3000 : 2000;
+  const homeInterval = setInterval(()=>{
+    if(!homeRenderer){ clearInterval(homeInterval); return; }
+    homeElIdx=(homeElIdx+1)%Math.min(ELEMENTS.length, 20); // limit to first 20 on mobile
     rebuildAtomGeometry(homeGroup, homeElectrons, ELEMENTS[homeElIdx]);
-  }, 2000);
+  }, cycleMs);
 
+  let frameCount=0;
   function loop(t) {
     homeFrame = requestAnimationFrame(loop);
+    frameCount++;
+    // Skip frames on mobile for 30fps target
+    if(isMobile && frameCount%2===0) { renderer.render(scene, camera); return; }
     animateAtom(homeGroup, homeElectrons, t);
-    homeGroup.rotation.y += 0.006;
-    homeGroup.rotation.x += 0.002;
+    homeGroup.rotation.y += 0.008;
+    homeGroup.rotation.x += 0.003;
     renderer.render(scene, camera);
   }
   loop(0);
@@ -2110,62 +2771,60 @@ function initARMode() {
 
 function setupARScene() {
   const canvas = document.getElementById('ar-canvas');
+  if(arRenderer) { arRenderer.dispose(); cancelAnimationFrame(arFrame); arRenderer=null; }
 
-  if (arRenderer) { arRenderer.dispose(); cancelAnimationFrame(arFrame); arRenderer = null; }
-
-  // Always use window dimensions — never trust container at this point
+  const isMobile = window.innerWidth < 600;
   const W = window.innerWidth;
   const H = window.innerHeight;
 
-  // Set canvas buffer size explicitly
-  canvas.width  = W;
-  canvas.height = H;
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
+  canvas.width  = W; canvas.height  = H;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
 
-  // Size gesture canvas too
   const gc = document.getElementById('gesture-canvas');
-  gc.width  = W; gc.height  = H;
-  gc.style.width  = W + 'px';
-  gc.style.height = H + 'px';
+  if(gc) { gc.width=W; gc.height=H; gc.style.width=W+'px'; gc.style.height=H+'px'; }
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference:'high-performance' });
-  renderer.setSize(canvas.width, canvas.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const renderer = new THREE.WebGLRenderer({
+    canvas, antialias:!isMobile, alpha:true, powerPreference:'high-performance',
+  });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
   renderer.setClearColor(0,0);
 
   const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, canvas.width/canvas.height, 0.1, 500);
-  camera.position.set(0,0,12);
+  const camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 500);
+  camera.position.set(0, 0, isMobile ? 14 : 12);
 
-  scene.add(new THREE.AmbientLight(0x112244, 3));
-  const pl1 = new THREE.PointLight(0x00f5ff, 4, 50); pl1.position.set(0,8,6);  scene.add(pl1);
-  const pl2 = new THREE.PointLight(0x0055ff, 2, 40); pl2.position.set(-8,-4,0); scene.add(pl2);
+  scene.add(new THREE.AmbientLight(0x0a1a33, 4));
+  const pl1 = new THREE.PointLight(0x00ccff, 5, 60); pl1.position.set(5,8,8);  scene.add(pl1);
+  const pl2 = new THREE.PointLight(0x5500ff, 3, 45); pl2.position.set(-8,-4,2); scene.add(pl2);
+  const pl3 = new THREE.PointLight(0xff0066, 2, 35); pl3.position.set(4,-6,-4); scene.add(pl3);
 
-  const group = new THREE.Group(); scene.add(group);
+  const group = new THREE.Group();
+  scene.add(group);
   const electrons = [];
   buildAtomGeometry(group, electrons, currentElement);
 
   arRenderer=renderer; arCamera=camera; arScene_=scene; arGroup=group; arElectrons=electrons;
   gs = {scale:1, prevPinch:null, prevX:null, prevY:null, prevTwo:null};
 
+  let frameCount=0;
   function loop(time) {
     arFrame = requestAnimationFrame(loop);
+    frameCount++;
 
-    // FPS
+    // FPS counter
     fpsCount++;
-    if(time-lastFpsTime>1000){
-      fps=fpsCount; fpsCount=0; lastFpsTime=time;
-      setTextSafe('hud-fps', fps);
-    }
+    if(time-lastFpsTime>1000){ fps=fpsCount; fpsCount=0; lastFpsTime=time; setTextSafe('hud-fps',fps); }
+
+    // Skip frames on mobile for performance
+    if(isMobile && frameCount%2===0) { renderer.render(scene,camera); return; }
 
     animateAtom(arGroup, arElectrons, time);
     arGroup.rotation.y += 0.006;
     renderer.render(scene, camera);
 
-    // Update HUD scale bar
     updateScaleBar(gs.scale);
-    setTextSafe('hud-roty', Math.round((arGroup.rotation.y%(Math.PI*2))/(Math.PI*2)*360) + '°');
+    setTextSafe('hud-roty', Math.round((arGroup.rotation.y%(Math.PI*2))/(Math.PI*2)*360)+'°');
   }
   loop(0);
 }
@@ -2290,6 +2949,12 @@ function onHandResults(results) {
   const ctx  = gc.getContext('2d');
   ctx.clearRect(0,0,gc.width,gc.height);
 
+  // Hide hand rings when no hands
+  [0,1].forEach(i => {
+    const ring = document.getElementById('hand-ring-'+i);
+    if (ring) ring.style.display = 'none';
+  });
+
   if(!results.multiHandLandmarks || results.multiHandLandmarks.length===0) {
     setTextSafe('hud-hands','SEARCHING');
     document.getElementById('hud-hands').className='hud-val warn';
@@ -2303,7 +2968,32 @@ function onHandResults(results) {
   setTextSafe('hud-hands', results.multiHandLandmarks.length + ' HAND' + (results.multiHandLandmarks.length>1?'S':''));
   document.getElementById('hud-hands').className='hud-val active';
 
-  results.multiHandLandmarks.forEach((lm,i) => drawHandSkeleton(ctx, lm, gc.width, gc.height, i));
+  results.multiHandLandmarks.forEach((lm, i) => {
+    drawHandSkeleton(ctx, lm, gc.width, gc.height, i);
+    // Position hand cursor ring at palm center
+    const palm = lm[0];
+    const ring = document.getElementById('hand-ring-'+i);
+    if (ring && palm) {
+      const rx = (1 - palm.x) * gc.width;
+      const ry = palm.y * gc.height;
+      // Size ring based on pinch distance
+      const thumb = lm[4], index = lm[8];
+      const pinch = Math.hypot(thumb.x-index.x, thumb.y-index.y);
+      const ringSize = Math.max(20, Math.min(70, pinch * gc.width * 1.2));
+      ring.style.display = 'block';
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      ring.style.width  = ringSize + 'px';
+      ring.style.height = ringSize + 'px';
+      // Color shift based on pinch
+      const isPinching = pinch < 0.06;
+      if (i === 0) {
+        ring.style.borderColor = isPinching ? 'rgba(255,200,0,0.9)' : 'rgba(0,245,255,0.8)';
+        ring.style.boxShadow   = isPinching ? '0 0 20px rgba(255,200,0,0.6)' : '0 0 12px rgba(0,245,255,0.4)';
+      }
+    }
+  });
+
   processGestures(results.multiHandLandmarks);
 
   const conf = results.multiHandWorldLandmarks?.[0] ? '98%' : '—';
@@ -2312,60 +3002,70 @@ function onHandResults(results) {
 
 function drawHandSkeleton(ctx, landmarks, w, h, handIdx) {
   const CONNECTIONS = [
-    [0,1],[1,2],[2,3],[3,4],         // thumb
-    [0,5],[5,6],[6,7],[7,8],         // index
-    [5,9],[9,10],[10,11],[11,12],    // middle
-    [9,13],[13,14],[14,15],[15,16],  // ring
-    [13,17],[17,18],[18,19],[19,20], // pinky
-    [0,17],[0,5],                    // palm
+    [0,1],[1,2],[2,3],[3,4],
+    [0,5],[5,6],[6,7],[7,8],
+    [5,9],[9,10],[10,11],[11,12],
+    [9,13],[13,14],[14,15],[15,16],
+    [13,17],[17,18],[18,19],[19,20],
+    [0,17],[0,5],
   ];
 
-  const col = handIdx===0 ? 'rgba(0,245,255,' : 'rgba(168,85,247,';
+  const baseCol = handIdx===0 ? '0,245,255' : '168,85,247';
 
-  // Connections
+  // Connection lines with gradient
   ctx.lineWidth = 1.5;
   CONNECTIONS.forEach(([a,b]) => {
     const la=landmarks[a], lb=landmarks[b];
     const x1=(1-la.x)*w, y1=la.y*h, x2=(1-lb.x)*w, y2=lb.y*h;
     const gradient = ctx.createLinearGradient(x1,y1,x2,y2);
-    gradient.addColorStop(0, col+'0.8)'); gradient.addColorStop(1, col+'0.3)');
+    gradient.addColorStop(0, `rgba(${baseCol},0.75)`);
+    gradient.addColorStop(1, `rgba(${baseCol},0.25)`);
     ctx.strokeStyle = gradient;
     ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
   });
 
-  // Joints
-  landmarks.forEach((lm,i) => {
+  // Joints with glow
+  landmarks.forEach((lm, i) => {
     const x=(1-lm.x)*w, y=lm.y*h;
-    const isKey = [0,4,8,12,16,20].includes(i);
-    const isTip = [4,8].includes(i);
+    const isTip  = [4,8,12,16,20].includes(i);
+    const isKey  = [0,4,8].includes(i);
+    const size   = isTip ? 5 : isKey ? 3.5 : 2;
 
-    if(isTip) {
-      // Glowing tip
-      const grd = ctx.createRadialGradient(x,y,0,x,y,10);
-      grd.addColorStop(0, col+'1)'); grd.addColorStop(1, col+'0)');
-      ctx.beginPath(); ctx.arc(x,y,10,0,Math.PI*2);
+    // Glow halo for fingertips
+    if (isTip) {
+      const grd = ctx.createRadialGradient(x,y,0,x,y,12);
+      grd.addColorStop(0, `rgba(${baseCol},0.5)`);
+      grd.addColorStop(1, `rgba(${baseCol},0)`);
+      ctx.beginPath(); ctx.arc(x,y,12,0,Math.PI*2);
       ctx.fillStyle=grd; ctx.fill();
     }
-    ctx.beginPath(); ctx.arc(x, y, isTip?5:isKey?3.5:2, 0, Math.PI*2);
-    ctx.fillStyle = isTip ? 'rgba(255,100,50,1)' : col+'0.85)';
+
+    ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI*2);
+    ctx.fillStyle = (i===4||i===8) ? 'rgba(255,120,50,1)' : `rgba(${baseCol},0.9)`;
     ctx.fill();
   });
 
-  // Pinch line between thumb tip (4) and index tip (8)
+  // Pinch indicator
   const t=landmarks[4], ix=landmarks[8];
   const tx=(1-t.x)*w, ty=t.y*h, inx=(1-ix.x)*w, iny=ix.y*h;
   const pd=Math.hypot(tx-inx, ty-iny);
-  const pinching = pd < w*0.06;
-  ctx.strokeStyle = pinching ? 'rgba(255,200,0,0.9)' : 'rgba(255,255,255,0.2)';
-  ctx.lineWidth = pinching ? 2 : 1;
-  ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(inx,iny); ctx.stroke();
+  const isPinching = pd < w*0.06;
+
+  ctx.setLineDash([4,4]);
+  ctx.strokeStyle = isPinching ? 'rgba(255,200,0,0.8)' : `rgba(${baseCol},0.25)`;
+  ctx.lineWidth   = isPinching ? 2 : 1;
+  ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(inx,iny); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Pinch circle
-  if(pinching) {
+  if (isPinching) {
     const mx=(tx+inx)/2, my=(ty+iny)/2;
-    ctx.beginPath(); ctx.arc(mx,my,pd/2,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,200,0,0.7)'; ctx.lineWidth=1.5; ctx.stroke();
+    const grd = ctx.createRadialGradient(mx,my,0,mx,my,pd*0.5);
+    grd.addColorStop(0,'rgba(255,200,0,0.4)'); grd.addColorStop(1,'rgba(255,200,0,0)');
+    ctx.beginPath(); ctx.arc(mx,my,pd*0.5,0,Math.PI*2);
+    ctx.fillStyle=grd; ctx.fill();
+    // Label
+    ctx.font = '10px monospace'; ctx.fillStyle='rgba(255,200,0,0.9)';
+    ctx.fillText('PINCH', mx+pd*0.5+4, my);
   }
 }
 
@@ -2439,21 +3139,27 @@ function processGestures(hands) {
 }
 
 function perturbElectrons(normX, normY, strength) {
-  arElectrons.forEach(obj => {
-    if(obj.userData.type !== 'electron') return;
-    const worldPos = new THREE.Vector3();
-    obj.getWorldPosition(worldPos);
-    // Map normalized hand coords to 3D space
-    const hx = (0.5 - normX) * 24;
-    const hy = (0.5 - normY) * 18;
-    const dx = hx - worldPos.x;
-    const dy = hy - worldPos.y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    if(dist < 5) {
-      const force = strength * (5-dist)/5;
-      obj.userData.velocityBoost = (obj.userData.velocityBoost||0) + force * 0.3;
-    }
-  });
+  if (!arElectrons || !arGroup || !arCamera) return;
+  // Convert normalized 2D hand coords → 3D world position at atom depth
+  const handWorld = handScreenToWorld(normX, normY);
+  // Apply physics-based repulsion to electrons
+  applyElectronPhysics(arElectrons, handWorld, Date.now(), 5.5, strength * 0.14);
+  // Animate energy particle field toward hand
+  if (arGroup.userData.fieldPts) animateEnergyField(arGroup, handWorld, Date.now());
+}
+
+// Convert normalized [0,1] hand screen coords → Three.js world position
+function handScreenToWorld(normX, normY) {
+  if (!arCamera) return null;
+  // Flip X because video is mirrored
+  const ndcX = (1 - normX) * 2 - 1;
+  const ndcY = (1 - normY) * 2 - 1;
+  const vec  = new THREE.Vector3(ndcX, ndcY, 0.7);
+  vec.unproject(arCamera);
+  const dir  = vec.sub(arCamera.position).normalize();
+  // Project to z=0 plane (where atom lives)
+  const t    = (0 - arCamera.position.z) / dir.z;
+  return arCamera.position.clone().add(dir.multiplyScalar(t));
 }
 
 function showGestureLabel(text) {
@@ -2528,22 +3234,945 @@ function simulateHandTracking() {
 // ============================================================
 //  RESIZE
 // ============================================================
-window.addEventListener('resize', () => {
-  if(atomRenderer && atomCamera) {
-    const c = document.getElementById('atom-canvas-container');
-    atomRenderer.setSize(c.clientWidth, c.clientHeight);
-    atomCamera.aspect = c.clientWidth / c.clientHeight;
-    atomCamera.updateProjectionMatrix();
-  }
-  if(arRenderer && arCamera) {
-    const v = document.getElementById('view-ar');
-    arRenderer.setSize(v.clientWidth, v.clientHeight);
-    arCamera.aspect = v.clientWidth / v.clientHeight;
-    arCamera.updateProjectionMatrix();
-  }
-});
+// Debounced resize — handles orientation change on mobile
+let _resizeTimer = null;
+function handleResize() {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => {
+    if(atomRenderer && atomCamera) {
+      const c = document.getElementById('atom-canvas-container');
+      const W = c.clientWidth  > 10 ? c.clientWidth  : window.innerWidth;
+      const H = c.clientHeight > 10 ? c.clientHeight : Math.round(window.innerHeight*0.55);
+      atomRenderer.setSize(W, H);
+      atomCamera.aspect = W / H;
+      atomCamera.updateProjectionMatrix();
+    }
+    if(arRenderer && arCamera) {
+      const W = window.innerWidth, H = window.innerHeight;
+      arRenderer.setSize(W, H);
+      arCamera.aspect = W / H;
+      arCamera.updateProjectionMatrix();
+      // Resize gesture canvas too
+      const gc = document.getElementById('gesture-canvas');
+      if(gc) { gc.width=W; gc.height=H; }
+    }
+    if(molRenderer && molCamera) {
+      const w = document.getElementById('mol-canvas-wrap');
+      const W = w.clientWidth||window.innerWidth, H = w.clientHeight||window.innerHeight-56;
+      molRenderer.setSize(W,H);
+      molCamera.aspect = W/H;
+      molCamera.updateProjectionMatrix();
+    }
+    if(pgRenderer && pgCamera) {
+      const W = window.innerWidth, H = window.innerHeight-56;
+      pgRenderer.setSize(W,H);
+      pgCamera.aspect = W/H;
+      pgCamera.updateProjectionMatrix();
+    }
+    // Re-init atom viewer if it was already open (mobile orientation flip)
+    const atomView = document.getElementById('view-atom');
+    if(atomView && atomView.classList.contains('active') && atomRenderer) {
+      const c = document.getElementById('atom-canvas-container');
+      const W = c.clientWidth, H = c.clientHeight;
+      if(W > 10 && H > 10) {
+        atomRenderer.setSize(W,H);
+        atomCamera.aspect=W/H;
+        atomCamera.updateProjectionMatrix();
+      }
+    }
+  }, 150);
+}
+window.addEventListener('resize', handleResize);
+window.addEventListener('orientationchange', () => setTimeout(handleResize, 300));
 
-// Keyboard shortcuts
+// ============================================================
+//  ELECTRON PHYSICS ENGINE
+// ============================================================
+// Each electron gets extended physics state
+function initElectronPhysics(electrons) {
+  electrons.forEach(obj => {
+    if (obj.userData.type !== 'electron') return;
+    obj.userData.physics = {
+      repelForce: new THREE.Vector3(),
+      repelVelocity: new THREE.Vector3(),
+      wobble: 0,
+      wobbleVel: 0,
+      excitationLevel: 0,    // 0 = ground, 1+ = excited
+      excitationTimer: 0,
+      originalRadius: obj.userData.radius,
+      originalShell: obj.userData.shell,
+    };
+  });
+}
+
+// Call this every frame with hand position in 3D world space
+function applyElectronPhysics(electrons, handWorldPos, time, interactionRadius = 5.0, repulsionStrength = 0.12) {
+  const t = time * 0.001;
+  electrons.forEach(obj => {
+    const d = obj.userData;
+    if (d.type !== 'electron' || !d.physics) return;
+    const ph = d.physics;
+
+    // Repulsion from hand
+    if (handWorldPos) {
+      const delta = new THREE.Vector3().subVectors(obj.position, handWorldPos);
+      const dist  = delta.length();
+      if (dist < interactionRadius && dist > 0.01) {
+        const strength = repulsionStrength * Math.pow(1 - dist / interactionRadius, 2);
+        delta.normalize().multiplyScalar(strength);
+        ph.repelForce.copy(delta);
+        // Wobble the orbit
+        ph.wobbleVel += strength * 2;
+        d.velocityBoost = (d.velocityBoost || 0) + strength * 0.5;
+      }
+    }
+
+    // Apply repel velocity
+    ph.repelVelocity.add(ph.repelForce);
+    ph.repelVelocity.multiplyScalar(0.85); // damping
+    ph.repelForce.multiplyScalar(0.7);
+
+    // Wobble orbit radius
+    ph.wobbleVel += -ph.wobble * 0.3; // spring back
+    ph.wobbleVel *= 0.88;
+    ph.wobble += ph.wobbleVel;
+
+    // Excitation decay
+    if (ph.excitationLevel > 0) {
+      ph.excitationTimer--;
+      if (ph.excitationTimer <= 0) {
+        ph.excitationLevel = 0;
+        d.radius = ph.originalRadius;
+        triggerPhotonEmission(obj, d, time);
+      }
+    }
+
+    // Apply repel offset to position
+    obj.position.add(ph.repelVelocity);
+  });
+}
+
+function triggerPhotonEmission(electronObj, elData, time) {
+  // Flash effect
+  const flashEl = document.createElement('div');
+  flashEl.className = 'photon-flash';
+  const hue = Math.round((elData.shell * 60 + 180) % 360);
+  flashEl.style.background = `radial-gradient(ellipse at 50% 50%, hsla(${hue},100%,70%,0.4) 0%, transparent 70%)`;
+  document.body.appendChild(flashEl);
+  setTimeout(() => flashEl.remove(), 450);
+
+  // Sound
+  if (soundEnabled) {
+    const freq = 400 + elData.shell * 150;
+    playTone(freq, 'sine', 0.5, 0.08);
+    setTimeout(() => playTone(freq * 1.5, 'triangle', 0.2, 0.05), 100);
+  }
+
+  // Show indicator
+  const ind = document.getElementById('excitation-indicator');
+  if (ind) {
+    ind.textContent = `PHOTON EMITTED — n=${elData.shell + 1} → GROUND STATE`;
+    ind.style.color = `hsl(${hue},100%,70%)`;
+    ind.style.borderColor = `hsl(${hue},100%,70%)`;
+    ind.style.background = `hsla(${hue},100%,10%,0.8)`;
+    ind.style.opacity = '1';
+    setTimeout(() => { ind.style.opacity = '0'; }, 2000);
+  }
+}
+
+function exciteElectron() {
+  const electrons = atomElectrons;
+  if (!electrons || !electrons.length) return;
+  // Find a ground-state electron
+  const candidates = electrons.filter(e => e.userData.type === 'electron' && (!e.userData.physics || e.userData.physics.excitationLevel === 0));
+  if (!candidates.length) { toast('All electrons already excited!', 'warn', '⚡'); return; }
+  const e = candidates[Math.floor(Math.random() * Math.min(candidates.length, 3))];
+  if (!e.userData.physics) initElectronPhysics([e]);
+  const ph = e.userData.physics;
+  ph.excitationLevel = 1;
+  ph.excitationTimer = 180; // frames until fall back
+  e.userData.radius = e.userData.radius * 1.6; // jump to higher shell
+  // Glow
+  if (e.material) {
+    e.material.emissiveIntensity = 3;
+    setTimeout(() => { if (e.material) e.material.emissiveIntensity = 0.7; }, 800);
+  }
+  toast(`Electron excited to n=${e.userData.shell + 2}`, 'success', '⚡');
+  playTone(800, 'sine', 0.3, 0.06);
+
+  // Show energy diagram
+  const ed = document.getElementById('energy-diagram');
+  if (ed) { ed.classList.add('visible'); buildEnergyDiagram(currentElement); }
+}
+
+function toggleEnergyDiagram() {
+  const ed = document.getElementById('energy-diagram');
+  if (!ed) return;
+  const visible = ed.classList.toggle('visible');
+  document.getElementById('btn-energy').classList.toggle('active', visible);
+  if (visible) buildEnergyDiagram(currentElement);
+}
+
+function buildEnergyDiagram(el) {
+  const container = document.getElementById('ed-levels');
+  if (!container) return;
+  const shells = el.shells || [1];
+  const shellColors = ['#00f5ff','#44aaff','#aa55ff','#ff44aa','#ff8844','#ffdd00','#44ff88'];
+  container.innerHTML = shells.map((count, i) => {
+    const col = shellColors[i % shellColors.length];
+    const energyLabel = `n=${i+1}  E=${-(13.6 / Math.pow(i+1, 2)).toFixed(1)}eV`;
+    const eDots = Array.from({length: Math.min(count, 8)}, () =>
+      `<div class="ed-e" style="background:${col}55;border-color:${col}"></div>`
+    ).join('');
+    return `
+      <div class="ed-level">
+        <div class="ed-label" style="color:${col}">${i+1}</div>
+        <div class="ed-line" style="background:${col}44;border:1px solid ${col}66"></div>
+        <div class="ed-electrons">${eDots}</div>
+      </div>
+      <div style="font-family:var(--fm);font-size:0.52rem;color:var(--t3);margin-bottom:4px;padding-left:28px;">${energyLabel}</div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+//  PARTICLE ENERGY FIELD (enhanced)
+// ============================================================
+function buildEnergyParticleField(group, el, shellCount) {
+  // Remove old field
+  const old = group.getObjectByName('energyField');
+  if (old) group.remove(old);
+
+  const fieldGroup = new THREE.Group();
+  fieldGroup.name = 'energyField';
+
+  const N = 600;
+  const positions = new Float32Array(N * 3);
+  const velocities = [];
+  const baseRadius = shellCount * 1.4 + 3;
+  const elColor = new THREE.Color(el.color || '#00f5ff');
+
+  for (let i = 0; i < N; i++) {
+    const r = baseRadius + Math.random() * 5;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.random() * Math.PI;
+    positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    positions[i*3+2] = r * Math.cos(phi);
+    velocities.push(new THREE.Vector3(
+      (Math.random()-0.5)*0.01,
+      (Math.random()-0.5)*0.01,
+      (Math.random()-0.5)*0.01
+    ));
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const mat = new THREE.PointsMaterial({
+    color: elColor, size: 0.06, transparent: true, opacity: 0.55,
+    sizeAttenuation: true, blending: THREE.AdditiveBlending,
+  });
+  const pts = new THREE.Points(geo, mat);
+  pts.userData = { velocities, baseRadius, N };
+  fieldGroup.add(pts);
+  group.add(fieldGroup);
+  group.userData.energyField = fieldGroup;
+  group.userData.fieldPts = pts;
+}
+
+function animateEnergyField(group, handWorldPos, time) {
+  const pts = group.userData.fieldPts;
+  if (!pts) return;
+  const t = time * 0.001;
+  const positions = pts.geometry.attributes.position.array;
+  const vels = pts.userData.velocities;
+  const baseR = pts.userData.baseRadius;
+  const N = pts.userData.N;
+
+  for (let i = 0; i < N; i++) {
+    const ix = i*3, iy = i*3+1, iz = i*3+2;
+    const px = positions[ix], py = positions[iy], pz = positions[iz];
+
+    // Gentle orbit drift
+    vels[i].x += (Math.random()-0.5)*0.002;
+    vels[i].y += (Math.random()-0.5)*0.002;
+    vels[i].z += (Math.random()-0.5)*0.002;
+
+    // Spring back to sphere surface
+    const dist = Math.sqrt(px*px + py*py + pz*pz);
+    const springF = (dist - baseR) * 0.003;
+    vels[i].x -= (px/dist) * springF;
+    vels[i].y -= (py/dist) * springF;
+    vels[i].z -= (pz/dist) * springF;
+
+    // Hand interaction — swirl toward hand
+    if (handWorldPos) {
+      const dx = handWorldPos.x - px;
+      const dy = handWorldPos.y - py;
+      const dz = handWorldPos.z - pz;
+      const hdist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+      if (hdist < 6 && hdist > 0.1) {
+        const attract = 0.003 * (1 - hdist/6);
+        // Swirl: use cross product for orbital motion
+        const cx = dy*pz - dz*py;
+        const cy = dz*px - dx*pz;
+        const cz = dx*py - dy*px;
+        const cl = Math.sqrt(cx*cx+cy*cy+cz*cz)||1;
+        vels[i].x += (cx/cl) * attract * 0.5 + dx/hdist * attract;
+        vels[i].y += (cy/cl) * attract * 0.5 + dy/hdist * attract;
+        vels[i].z += (cz/cl) * attract * 0.5 + dz/hdist * attract;
+      }
+    }
+
+    // Damping + pulsing
+    vels[i].multiplyScalar(0.96);
+    const pulse = 1 + Math.sin(t + i*0.1) * 0.008;
+    positions[ix]  = (px + vels[i].x) * pulse;
+    positions[iy]  = (py + vels[i].y) * pulse;
+    positions[iz]  = (pz + vels[i].z) * pulse;
+  }
+  pts.geometry.attributes.position.needsUpdate = true;
+
+  // Pulse opacity
+  pts.material.opacity = 0.4 + Math.sin(t*1.5)*0.15;
+}
+
+// ============================================================
+//  MOLECULE BUILDER
+// ============================================================
+const MOLECULE_PRESETS = {
+  H2O:  { name:'Water',          formula:'H₂O',  atoms:[{s:'O',pos:[0,0,0]},{s:'H',pos:[-1.6,-1.0,0]},{s:'H',pos:[1.6,-1.0,0]}],   bonds:[[0,1],[0,2]],          angle:104.5, bondType:'covalent' },
+  CO2:  { name:'Carbon Dioxide', formula:'CO₂',  atoms:[{s:'C',pos:[0,0,0]},{s:'O',pos:[-2.3,0,0]},{s:'O',pos:[2.3,0,0]}],          bonds:[[0,1],[0,2]],          angle:180,   bondType:'double'   },
+  CH4:  { name:'Methane',        formula:'CH₄',  atoms:[{s:'C',pos:[0,0,0]},{s:'H',pos:[1.4,1.4,1.4]},{s:'H',pos:[-1.4,-1.4,1.4]},{s:'H',pos:[-1.4,1.4,-1.4]},{s:'H',pos:[1.4,-1.4,-1.4]}], bonds:[[0,1],[0,2],[0,3],[0,4]], angle:109.5, bondType:'covalent' },
+  NH3:  { name:'Ammonia',        formula:'NH₃',  atoms:[{s:'N',pos:[0,0,0]},{s:'H',pos:[1.2,-0.5,1.0]},{s:'H',pos:[-1.2,-0.5,1.0]},{s:'H',pos:[0,0,-1.4]}],      bonds:[[0,1],[0,2],[0,3]],    angle:107,   bondType:'covalent' },
+  NaCl: { name:'Sodium Chloride',formula:'NaCl', atoms:[{s:'Na',pos:[-1.4,0,0]},{s:'Cl',pos:[1.4,0,0]}],                            bonds:[[0,1]],                angle:180,   bondType:'ionic'    },
+  O2:   { name:'Oxygen',         formula:'O₂',   atoms:[{s:'O',pos:[-1.1,0,0]},{s:'O',pos:[1.1,0,0]}],                              bonds:[[0,1]],                angle:180,   bondType:'double'   },
+};
+
+const ELEMENT_COLORS = { H:'#00f5ff', O:'#ff4444', C:'#aaaaaa', N:'#4488ff', S:'#ffdd00', Na:'#ff7744', Cl:'#ff33aa', default:'#ffffff' };
+const BOND_RULES = {
+  'H-O':1,'O-H':1,'H-C':1,'C-H':1,'H-N':1,'N-H':1,'C-O':2,'O-C':2,'C-C':1,'N-N':1,'O-O':2,
+  'Na-Cl':1,'Cl-Na':1,'C-N':1,'N-C':1,
+};
+
+let molScene=null, molCamera=null, molRenderer=null, molFrame=null;
+let molAtoms=[], molBonds=[], molSelectedElement='H', molAutoBond=true;
+let molDragAtom=null, molDragOffset=new THREE.Vector3();
+let molMouse=new THREE.Vector2(), molRaycaster=new THREE.Raycaster();
+
+function initMoleculeBuilder() {
+  const canvas = document.getElementById('mol-canvas');
+  const wrap   = document.getElementById('mol-canvas-wrap');
+  if (molRenderer) { molRenderer.dispose(); cancelAnimationFrame(molFrame); molRenderer=null; }
+
+  canvas.width  = wrap.clientWidth  || window.innerWidth;
+  canvas.height = wrap.clientHeight || window.innerHeight - 56;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setSize(canvas.width, canvas.height);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setClearColor(0x020509, 1);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, canvas.width/canvas.height, 0.1, 500);
+  camera.position.set(0, 0, 18);
+
+  scene.add(new THREE.AmbientLight(0x334466, 4));
+  const pl1 = new THREE.PointLight(0x00f5ff, 4, 60); pl1.position.set(0,8,6);  scene.add(pl1);
+  const pl2 = new THREE.PointLight(0x0055ff, 2, 40); pl2.position.set(-8,-4,0); scene.add(pl2);
+
+  // Grid plane
+  const gridHelper = new THREE.GridHelper(40, 20, 0x0a2030, 0x061520);
+  gridHelper.position.y = -8;
+  scene.add(gridHelper);
+
+  molScene=scene; molCamera=camera; molRenderer=renderer;
+  molAtoms=[]; molBonds=[];
+
+  // Mouse events for drag
+  canvas.addEventListener('mousedown', molOnMouseDown);
+  canvas.addEventListener('mousemove', molOnMouseMove);
+  canvas.addEventListener('mouseup',   molOnMouseUp);
+  canvas.addEventListener('wheel',     e => { molCamera.position.z = Math.max(5, Math.min(40, molCamera.position.z + e.deltaY*0.02)); }, {passive:true});
+
+  function loop() {
+    molFrame = requestAnimationFrame(loop);
+    molUpdate();
+    renderer.render(scene, camera);
+  }
+  loop();
+}
+
+function molGetColor(symbol) { return ELEMENT_COLORS[symbol] || ELEMENT_COLORS.default; }
+function molGetRadius(symbol) { const r={H:0.35,O:0.6,C:0.55,N:0.55,S:0.75,Na:0.8,Cl:0.7}; return r[symbol]||0.5; }
+
+function molSpawnAtom(symbol, position) {
+  symbol = symbol || molSelectedElement;
+  const pos = position || new THREE.Vector3((Math.random()-0.5)*8, (Math.random()-0.5)*4, 0);
+  const col = molGetColor(symbol);
+  const rad = molGetRadius(symbol);
+
+  const geo = new THREE.SphereGeometry(rad, 20, 20);
+  const mat = new THREE.MeshPhongMaterial({
+    color: col, emissive: col, emissiveIntensity: 0.2, shininess: 120,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.copy(pos);
+  mesh.userData = { type:'molAtom', symbol, velocity: new THREE.Vector3(), charge: 0 };
+  mesh.castShadow = true;
+  molScene.add(mesh);
+  molAtoms.push(mesh);
+
+  // Glow halo
+  const haloGeo = new THREE.SphereGeometry(rad*1.5, 16, 16);
+  const haloMat = new THREE.MeshBasicMaterial({ color: col, transparent:true, opacity:0.06, side:THREE.BackSide });
+  const halo = new THREE.Mesh(haloGeo, haloMat);
+  mesh.add(halo);
+
+  // Symbol label
+  mesh.userData.symbol = symbol;
+
+  if (molAutoBond) setTimeout(() => molDetectAndDrawBonds(), 50);
+  updateMolInfo();
+  return mesh;
+}
+
+function molSelectElement(sym) {
+  molSelectedElement = sym;
+  document.querySelectorAll('.mol-element-btn').forEach(b => b.classList.toggle('selected', b.dataset.el===sym));
+}
+
+function molDetectAndDrawBonds() {
+  // Remove old bond meshes
+  molBonds.forEach(b => molScene.remove(b));
+  molBonds = [];
+
+  const BOND_DIST = 3.5;
+  for (let i=0; i<molAtoms.length; i++) {
+    for (let j=i+1; j<molAtoms.length; j++) {
+      const a = molAtoms[i], b = molAtoms[j];
+      const dist = a.position.distanceTo(b.position);
+      const key  = `${a.userData.symbol}-${b.userData.symbol}`;
+      if (dist < BOND_DIST && BOND_RULES[key] !== undefined) {
+        const bond = molCreateBond(a.position, b.position, a.userData.symbol, b.userData.symbol, dist);
+        molBonds.push(bond);
+      }
+    }
+  }
+  updateMolInfo();
+}
+
+function molCreateBond(p1, p2, sym1, sym2, dist) {
+  const dir    = new THREE.Vector3().subVectors(p2, p1);
+  const len    = dir.length();
+  const mid    = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+  const key    = `${sym1}-${sym2}`;
+  const order  = BOND_RULES[key] || 1;
+
+  const bondGroup = new THREE.Group();
+  bondGroup.userData = { type:'bond', atom1:sym1, atom2:sym2, order };
+
+  const col = order===2 ? '#00ff88' : order===3 ? '#ff44aa' : '#44aaff';
+  const offsets = order===1 ? [0] : order===2 ? [-0.15,0.15] : [-0.25,0,0.25];
+
+  offsets.forEach(offset => {
+    const geo = new THREE.CylinderGeometry(0.06, 0.06, len, 8);
+    const mat = new THREE.MeshPhongMaterial({ color:col, emissive:col, emissiveIntensity:0.3, transparent:true, opacity:0.85 });
+    const cyl = new THREE.Mesh(geo, mat);
+    cyl.position.copy(mid);
+    cyl.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.clone().normalize());
+    if (offset !== 0) {
+      const perp = new THREE.Vector3(dir.y, -dir.x, 0).normalize().multiplyScalar(offset);
+      cyl.position.add(perp);
+    }
+    bondGroup.add(cyl);
+  });
+
+  molScene.add(bondGroup);
+  return bondGroup;
+}
+
+function molLoadPreset(name) {
+  molClearAll();
+  const preset = MOLECULE_PRESETS[name];
+  if (!preset) return;
+
+  preset.atoms.forEach(a => {
+    const pos = new THREE.Vector3(a.pos[0], a.pos[1], a.pos[2]);
+    molSpawnAtom(a.s, pos);
+  });
+
+  setTimeout(() => {
+    molDetectAndDrawBonds();
+    updateMolInfo(preset);
+  }, 100);
+
+  toast(`Loaded ${preset.name} (${preset.formula})`, 'success', '⬡');
+  playTone(440, 'sine', 0.3, 0.05);
+}
+
+function molClearAll() {
+  molAtoms.forEach(a => molScene.remove(a));
+  molBonds.forEach(b => molScene.remove(b));
+  molAtoms = []; molBonds = [];
+  updateMolInfo();
+}
+
+function molToggleAutoBond() {
+  molAutoBond = !molAutoBond;
+  document.getElementById('mol-auto-bond-btn').style.color = molAutoBond ? 'var(--nc)' : 'var(--t3)';
+  toast(`Auto-bond ${molAutoBond?'ON':'OFF'}`, 'info', '⚡');
+}
+
+function molUpdate() {
+  // Animate bond pulses
+  molBonds.forEach((bg, bi) => {
+    const t = Date.now()*0.001;
+    bg.children.forEach(cyl => {
+      if (cyl.material) cyl.material.emissiveIntensity = 0.2 + Math.sin(t*2+bi)*0.15;
+    });
+  });
+  // Soft spring between bonded atoms
+  if (molAutoBond) {
+    molAtoms.forEach(a => {
+      a.userData.velocity.multiplyScalar(0.9);
+      a.position.add(a.userData.velocity);
+    });
+  }
+}
+
+function updateMolInfo(preset) {
+  const el = document.getElementById('mol-info-content');
+  if (!el) return;
+  if (preset) {
+    el.innerHTML = `
+      <div class="mol-bond-item"><span class="mol-bond-label">MOLECULE</span><span class="mol-bond-val">${preset.name}</span></div>
+      <div class="mol-bond-item"><span class="mol-bond-label">FORMULA</span><span class="mol-bond-val">${preset.formula}</span></div>
+      <div class="mol-bond-item"><span class="mol-bond-label">BOND ANGLE</span><span class="mol-bond-val">${preset.angle}°</span></div>
+      <div class="mol-bond-item"><span class="mol-bond-label">BOND TYPE</span><span class="mol-bond-val" style="text-transform:uppercase;">${preset.bondType}</span></div>
+      <div class="mol-bond-item"><span class="mol-bond-label">ATOMS</span><span class="mol-bond-val">${preset.atoms.length}</span></div>
+      <div class="mol-bond-item"><span class="mol-bond-label">BONDS</span><span class="mol-bond-val">${preset.bonds.length}</span></div>
+    `;
+  } else {
+    const bondCount = molBonds.length;
+    const atomCount = molAtoms.length;
+    el.innerHTML = `
+      <div class="mol-bond-item"><span class="mol-bond-label">ATOMS</span><span class="mol-bond-val">${atomCount}</span></div>
+      <div class="mol-bond-item"><span class="mol-bond-label">BONDS</span><span class="mol-bond-val">${bondCount}</span></div>
+      ${atomCount===0?'<div style="font-family:var(--fm);font-size:0.6rem;color:var(--t3);margin-top:8px;">Add atoms above or load a preset</div>':''}
+    `;
+  }
+}
+
+// Mouse interaction for mol builder
+function molOnMouseDown(e) {
+  const rect = molRenderer.domElement.getBoundingClientRect();
+  molMouse.x =  ((e.clientX - rect.left)  / rect.width)  * 2 - 1;
+  molMouse.y = -((e.clientY - rect.top)   / rect.height) * 2 + 1;
+  molRaycaster.setFromCamera(molMouse, molCamera);
+  const hits = molRaycaster.intersectObjects(molAtoms);
+  if (hits.length > 0) {
+    molDragAtom   = hits[0].object;
+    molDragOffset.copy(hits[0].point).sub(molDragAtom.position);
+  } else {
+    // Click empty space → spawn
+    if (e.detail === 2) { // double click
+      const plane = new THREE.Plane(new THREE.Vector3(0,0,1), 0);
+      const target = new THREE.Vector3();
+      molRaycaster.ray.intersectPlane(plane, target);
+      molSpawnAtom(molSelectedElement, target);
+    }
+  }
+}
+function molOnMouseMove(e) {
+  if (!molDragAtom) return;
+  const rect = molRenderer.domElement.getBoundingClientRect();
+  molMouse.x =  ((e.clientX - rect.left)  / rect.width)  * 2 - 1;
+  molMouse.y = -((e.clientY - rect.top)   / rect.height) * 2 + 1;
+  molRaycaster.setFromCamera(molMouse, molCamera);
+  const plane = new THREE.Plane(new THREE.Vector3(0,0,1), 0);
+  const target = new THREE.Vector3();
+  molRaycaster.ray.intersectPlane(plane, target);
+  molDragAtom.position.copy(target).sub(molDragOffset);
+  if (molAutoBond) molDetectAndDrawBonds();
+}
+function molOnMouseUp() {
+  molDragAtom = null;
+  if (molAutoBond) molDetectAndDrawBonds();
+}
+
+// ============================================================
+//  PLAYGROUND MODE
+// ============================================================
+let pgScene=null, pgCamera=null, pgRenderer=null, pgFrame=null;
+let pgAtoms=[], pgGravity=true, pgCollisions=true;
+let pgFpsCount=0, pgFpsLast=0, pgFps=0;
+let pgMouse=new THREE.Vector2(), pgRaycaster=new THREE.Raycaster();
+let pgThrowStart=null, pgDragAtom=null;
+let pgImpactParticles=[];  // ephemeral collision sparks
+
+function spawnImpactParticles(position, color, intensity) {
+  if (!pgScene) return;
+  const count = Math.min(12, Math.floor(intensity * 60 + 4));
+  for (let i = 0; i < count; i++) {
+    const geo = new THREE.SphereGeometry(0.06 + Math.random()*0.06, 5, 5);
+    const mat = new THREE.MeshBasicMaterial({
+      color: color||'#00f5ff', transparent:true, opacity:0.9,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(position);
+    const vel = new THREE.Vector3(
+      (Math.random()-0.5)*0.3*intensity,
+      Math.random()*0.25*intensity + 0.05,
+      (Math.random()-0.5)*0.3*intensity
+    );
+    pgScene.add(mesh);
+    pgImpactParticles.push({ mesh, vel, life: 0.8 + Math.random()*0.4 });
+  }
+}
+
+const PG_ELEMENTS_POOL = ['H','He','Li','C','O','N','Na','Fe','Au','U'];
+const PG_COLORS = { H:'#00f5ff',He:'#ffe600',Li:'#ff7744',C:'#aaaaaa',O:'#ff4444',N:'#4488ff',Na:'#ff7744',Fe:'#cc8844',Au:'#ffd700',U:'#44dd44', default:'#ffffff' };
+
+function initPlayground() {
+  const canvas = document.getElementById('playground-canvas');
+  const view   = document.getElementById('view-playground');
+  if (pgRenderer) { pgRenderer.dispose(); cancelAnimationFrame(pgFrame); pgRenderer=null; }
+
+  const W = view.clientWidth  || window.innerWidth;
+  const H = (view.clientHeight || window.innerHeight) - 56;
+  canvas.width = W; canvas.height = H;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance' });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setClearColor(0x020509, 1);
+
+  const scene  = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x020509, 0.015);
+
+  const camera = new THREE.PerspectiveCamera(60, W/H, 0.1, 300);
+  camera.position.set(0, 4, 28);
+  camera.lookAt(0,0,0);
+
+  scene.add(new THREE.AmbientLight(0x223355, 3));
+  const pl = new THREE.PointLight(0x00f5ff, 3, 80); pl.position.set(0,10,10); scene.add(pl);
+  const pl2 = new THREE.PointLight(0xff44aa, 2, 60); pl2.position.set(-10,-5,0); scene.add(pl2);
+
+  // Floor
+  const floorGeo = new THREE.PlaneGeometry(80, 80, 20, 20);
+  const floorMat = new THREE.MeshBasicMaterial({ color:0x040d18, wireframe:true, transparent:true, opacity:0.3 });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI/2; floor.position.y = -10;
+  scene.add(floor);
+
+  pgScene=scene; pgCamera=camera; pgRenderer=renderer;
+  pgAtoms=[];
+
+  // Input
+  canvas.addEventListener('click',      pgOnClick);
+  canvas.addEventListener('mousedown',  pgOnMouseDown);
+  canvas.addEventListener('mousemove',  pgOnMouseMove);
+  canvas.addEventListener('mouseup',    pgOnMouseUp);
+  canvas.addEventListener('wheel', e => {
+    pgCamera.position.z = Math.max(8, Math.min(60, pgCamera.position.z + e.deltaY*0.04));
+  }, {passive:true});
+
+  // Spawn a few to start
+  pgSpawnRandom(4);
+
+  function loop(t) {
+    pgFrame = requestAnimationFrame(loop);
+    pgUpdate(t);
+    renderer.render(scene, camera);
+    pgFpsCount++;
+    if (t - pgFpsLast > 1000) {
+      pgFps = pgFpsCount; pgFpsCount = 0; pgFpsLast = t;
+      setTextSafe('pg-fps', pgFps);
+    }
+  }
+  loop(0);
+}
+
+function pgSpawnAtom(symbol, position, velocity) {
+  symbol = symbol || PG_ELEMENTS_POOL[Math.floor(Math.random()*PG_ELEMENTS_POOL.length)];
+  const col = PG_COLORS[symbol] || PG_COLORS.default;
+  const rad = 0.5 + Math.random()*0.4;
+  const pos = position || new THREE.Vector3(
+    (Math.random()-0.5)*16, (Math.random()-0.5)*6 + 4, (Math.random()-0.5)*6
+  );
+  const vel = velocity || new THREE.Vector3(
+    (Math.random()-0.5)*0.15, (Math.random()-0.5)*0.1, (Math.random()-0.5)*0.08
+  );
+
+  // Mini atom (nucleus + electrons)
+  const group = new THREE.Group();
+  group.position.copy(pos);
+
+  // Nucleus
+  const nucGeo = new THREE.SphereGeometry(rad, 14, 14);
+  const nucMat = new THREE.MeshPhongMaterial({
+    color:col, emissive:col, emissiveIntensity:0.3, shininess:100
+  });
+  const nuc = new THREE.Mesh(nucGeo, nucMat);
+  group.add(nuc);
+
+  // Mini orbit ring
+  const ringGeo = new THREE.TorusGeometry(rad*2.2, 0.03, 6, 50);
+  const ringMat = new THREE.MeshBasicMaterial({ color:col, transparent:true, opacity:0.3 });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = Math.random()*Math.PI;
+  ring.rotation.y = Math.random()*Math.PI;
+  group.add(ring);
+
+  // Mini electron
+  const eGeo = new THREE.SphereGeometry(rad*0.2, 8, 8);
+  const eMat = new THREE.MeshBasicMaterial({ color:col });
+  const electron = new THREE.Mesh(eGeo, eMat);
+  electron.userData = { orbitAngle: Math.random()*Math.PI*2, orbitSpeed: 0.03+Math.random()*0.04, orbitR: rad*2.2 };
+  group.add(electron);
+
+  // Glow
+  const glowGeo = new THREE.SphereGeometry(rad*2, 10, 10);
+  const glowMat = new THREE.MeshBasicMaterial({ color:col, transparent:true, opacity:0.05, side:THREE.BackSide });
+  group.add(new THREE.Mesh(glowGeo, glowMat));
+
+  group.userData = {
+    type: 'pgAtom', symbol, radius: rad, col,
+    velocity: vel.clone(),
+    angularVelocity: new THREE.Vector3((Math.random()-0.5)*0.02, (Math.random()-0.5)*0.02, (Math.random()-0.5)*0.02),
+    electron, ring,
+    mass: rad * 2,
+    bounces: 0,
+  };
+  pgScene.add(group);
+  pgAtoms.push(group);
+  setTextSafe('pg-atom-count', pgAtoms.length);
+
+  // Spawn burst
+  spawnImpactParticles(pos.clone(), col, 0.4);
+
+  return group;
+}
+
+function pgSpawnRandom(n) {
+  for (let i=0; i<n; i++) setTimeout(() => pgSpawnAtom(), i*80);
+}
+
+function pgUpdate(time) {
+  const t = time * 0.001;
+  const FLOOR = -10, CEILING = 14, WALL = 20;
+  const GRAVITY  = pgGravity    ? -0.005 : 0;
+  const DAMPING  = 0.988;
+
+  for (let i = 0; i < pgAtoms.length; i++) {
+    const atom = pgAtoms[i];
+    const d    = atom.userData;
+
+    // Gravity
+    d.velocity.y += GRAVITY;
+    d.velocity.multiplyScalar(DAMPING);
+    atom.position.add(d.velocity);
+
+    // Spin
+    atom.rotation.x += d.angularVelocity.x;
+    atom.rotation.y += d.angularVelocity.y;
+    d.angularVelocity.multiplyScalar(0.992);
+
+    // Electron orbit
+    if (d.electron) {
+      d.electron.userData.orbitAngle += d.electron.userData.orbitSpeed * (1 + d.velocity.length()*2);
+      const ang = d.electron.userData.orbitAngle;
+      const r   = d.electron.userData.orbitR;
+      d.electron.position.set(r*Math.cos(ang), r*Math.sin(ang)*0.35, r*Math.sin(ang)*0.93);
+    }
+    if (d.ring) {
+      d.ring.rotation.z += 0.015;
+      d.ring.rotation.x += 0.008;
+    }
+
+    // Nucleus glow pulse
+    const nuc = atom.children[0];
+    if (nuc && nuc.material) {
+      nuc.material.emissiveIntensity = 0.2 + Math.sin(t*2 + i*0.7)*0.12;
+    }
+
+    // Floor bounce with squash/stretch
+    if (atom.position.y - d.radius < FLOOR) {
+      atom.position.y = FLOOR + d.radius;
+      const spd = Math.abs(d.velocity.y);
+      d.velocity.y  = spd * 0.62;
+      d.velocity.x *= 0.92;
+      d.velocity.z *= 0.92;
+      if (spd > 0.02) {
+        // Squash on bounce
+        atom.scale.set(1+spd*0.3, 1-spd*0.2, 1+spd*0.3);
+        setTimeout(() => { if(atom.scale) atom.scale.set(1,1,1); }, 120);
+        spawnImpactParticles(atom.position.clone(), d.col, spd);
+        if (soundEnabled && spd > 0.1) playTone(120+Math.random()*80,'sine',0.08,0.04);
+      }
+    }
+    if (atom.position.y + d.radius > CEILING) {
+      atom.position.y = CEILING - d.radius; d.velocity.y = -Math.abs(d.velocity.y)*0.7;
+    }
+    ['x','z'].forEach(ax => {
+      if (Math.abs(atom.position[ax]) + d.radius > WALL) {
+        atom.position[ax] = Math.sign(atom.position[ax]) * (WALL - d.radius);
+        d.velocity[ax] *= -0.72;
+      }
+    });
+
+    // Atom-atom collisions
+    if (pgCollisions) {
+      for (let j = i+1; j < pgAtoms.length; j++) {
+        const other = pgAtoms[j];
+        const od    = other.userData;
+        const delta = new THREE.Vector3().subVectors(other.position, atom.position);
+        const dist  = delta.length();
+        const minD  = d.radius + od.radius + 0.05;
+        if (dist < minD && dist > 0.01) {
+          const norm    = delta.clone().normalize();
+          const overlap = (minD - dist) * 0.52;
+          atom.position.sub(norm.clone().multiplyScalar(overlap));
+          other.position.add(norm.clone().multiplyScalar(overlap));
+
+          // Elastic collision
+          const v1n = d.velocity.dot(norm);
+          const v2n = od.velocity.dot(norm);
+          const m1=d.mass, m2=od.mass, tot=m1+m2;
+          const nv1 = (v1n*(m1-m2) + 2*m2*v2n) / tot;
+          const nv2 = (v2n*(m2-m1) + 2*m1*v1n) / tot;
+          d.velocity.add(norm.clone().multiplyScalar((nv1-v1n)*0.88));
+          od.velocity.add(norm.clone().multiplyScalar((nv2-v2n)*0.88));
+
+          // Impact spark
+          const impactSpeed = Math.abs(nv1-v1n);
+          if (impactSpeed > 0.04) {
+            const mid = atom.position.clone().lerp(other.position, 0.5);
+            spawnImpactParticles(mid, d.col, impactSpeed);
+            if (soundEnabled && impactSpeed > 0.08) playTone(180+Math.random()*200,'triangle',0.07,0.04);
+          }
+        }
+      }
+    }
+  }
+
+  // Animate & expire impact particles
+  for (let i = pgImpactParticles.length-1; i >= 0; i--) {
+    const p = pgImpactParticles[i];
+    p.life -= 0.04;
+    p.mesh.position.add(p.vel);
+    p.vel.y -= 0.003;
+    p.vel.multiplyScalar(0.94);
+    p.mesh.material.opacity = Math.max(0, p.life);
+    p.mesh.scale.setScalar(p.life * 0.8);
+    if (p.life <= 0) {
+      pgScene.remove(p.mesh);
+      pgImpactParticles.splice(i, 1);
+    }
+  }
+}
+
+function pgToggleGravity() {
+  pgGravity = !pgGravity;
+  document.getElementById('pg-grav-btn').classList.toggle('active', pgGravity);
+  setTextSafe('pg-grav-label', pgGravity?'ON':'OFF');
+}
+function pgToggleCollisions() {
+  pgCollisions = !pgCollisions;
+  document.getElementById('pg-coll-btn').classList.toggle('active', pgCollisions);
+  setTextSafe('pg-coll-label', pgCollisions?'ON':'OFF');
+}
+function pgExplodeAll() {
+  if (!pgAtoms.length) { toast('No atoms to explode!', 'warn', '💥'); return; }
+  pgAtoms.forEach(a => {
+    const dir = a.position.clone().normalize();
+    if (dir.length() < 0.1) dir.set(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+    const force = 0.5 + Math.random()*0.5;
+    a.userData.velocity.add(dir.multiplyScalar(force));
+    a.userData.angularVelocity.set((Math.random()-0.5)*0.15,(Math.random()-0.5)*0.15,(Math.random()-0.5)*0.15);
+    spawnImpactParticles(a.position.clone(), a.userData.col, 1.5);
+  });
+  // Shockwave ring
+  if (pgScene) {
+    const ringGeo = new THREE.TorusGeometry(0.1, 0.08, 8, 40);
+    const ringMat = new THREE.MeshBasicMaterial({ color:0x00f5ff, transparent:true, opacity:0.8, blending:THREE.AdditiveBlending });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI/2;
+    pgScene.add(ring);
+    let t2=0;
+    const expand = () => {
+      t2 += 0.08;
+      ring.scale.setScalar(1 + t2*8);
+      ring.material.opacity = Math.max(0, 0.8 - t2);
+      if (t2 < 1) requestAnimationFrame(expand);
+      else pgScene.remove(ring);
+    };
+    expand();
+  }
+  const flash = document.createElement('div');
+  flash.className='photon-flash';
+  flash.style.background='radial-gradient(ellipse,rgba(255,200,50,0.45) 0%,transparent 70%)';
+  document.body.appendChild(flash); setTimeout(()=>flash.remove(),450);
+  playTone(60,'sawtooth',0.7,0.18);
+  setTimeout(()=>playTone(120,'triangle',0.3,0.12), 80);
+  toast('💥 EXPLOSION!', 'warn', '💥');
+}
+
+function pgClear() {
+  pgAtoms.forEach(a => pgScene && pgScene.remove(a));
+  pgImpactParticles.forEach(p => pgScene && pgScene.remove(p.mesh));
+  pgAtoms=[]; pgImpactParticles=[];
+  setTextSafe('pg-atom-count', 0);
+}
+
+function pgOnClick(e) {
+  if (pgDragAtom) return;
+  const rect = pgRenderer.domElement.getBoundingClientRect();
+  pgMouse.x =  ((e.clientX-rect.left)/rect.width)*2-1;
+  pgMouse.y = -((e.clientY-rect.top)/rect.height)*2+1;
+  pgRaycaster.setFromCamera(pgMouse, pgCamera);
+  // Launch toward camera ray direction
+  const dir = pgRaycaster.ray.direction.clone().multiplyScalar(0.35);
+  const spawnPos = new THREE.Vector3(
+    (Math.random()-0.5)*4, (Math.random()-0.5)*3 + 3, (Math.random()-0.5)*3
+  );
+  pgSpawnAtom(null, spawnPos, dir);
+}
+function pgOnMouseDown(e) {
+  const rect = pgRenderer.domElement.getBoundingClientRect();
+  pgMouse.x =  ((e.clientX-rect.left)/rect.width)*2-1;
+  pgMouse.y = -((e.clientY-rect.top)/rect.height)*2+1;
+  pgRaycaster.setFromCamera(pgMouse, pgCamera);
+  const meshes = pgAtoms.map(g => g.children[0]).filter(Boolean);
+  const hits = pgRaycaster.intersectObjects(meshes);
+  if (hits.length) pgDragAtom = hits[0].object.parent;
+}
+function pgOnMouseMove(e) {
+  if (!pgDragAtom) return;
+  const rect = pgRenderer.domElement.getBoundingClientRect();
+  const mx = ((e.clientX-rect.left)/rect.width)*2-1;
+  const my = -((e.clientY-rect.top)/rect.height)*2+1;
+  const dx = mx - pgMouse.x, dy = my - pgMouse.y;
+  pgDragAtom.userData.velocity.x += dx * 0.5;
+  pgDragAtom.userData.velocity.y += dy * 0.5;
+  pgMouse.x = mx; pgMouse.y = my;
+}
+function pgOnMouseUp() { pgDragAtom = null; }
+
+// Spawn selected element into molecule builder
+function molSpawnSelected() {
+  if (!molScene) { toast('Open Molecule Builder first', 'warn', '⚠'); return; }
+  const pos = new THREE.Vector3((Math.random()-0.5)*10, (Math.random()-0.5)*5, 0);
+  molSpawnAtom(molSelectedElement, pos);
+  playClickSound();
+}
+
+// ============================================================
+//  KEYBOARD SHORTCUTS
+// ============================================================
 window.addEventListener('keydown', e => {
   if(e.key==='ArrowRight') nextElement();
   if(e.key==='ArrowLeft')  prevElement();
@@ -2551,11 +4180,16 @@ window.addEventListener('keydown', e => {
   if(e.key==='2') showView('table');
   if(e.key==='3') showView('atom');
   if(e.key==='4') showView('ar');
+  if(e.key==='5') showView('molecule');
+  if(e.key==='6') showView('playground');
   if(e.key==='r'||e.key==='R') toggleAutoRotate();
   if(e.key==='o'||e.key==='O') toggleOrbitalDiagram();
   if(e.key==='w'||e.key==='W') toggleWireframe();
   if(e.key==='x'||e.key==='X') toggleExplode();
   if(e.key==='s'||e.key==='S') toggleSound();
+  if(e.key==='e'||e.key==='E') exciteElectron();
+  if(e.key==='f'||e.key==='F') { if(pgAtoms.length) pgExplodeAll(); }
+  if(e.key==='g'||e.key==='G') { if(pgRenderer) pgToggleGravity(); }
   if(e.key==='Escape') { closeCompareModal(); }
 });
 
@@ -2567,8 +4201,99 @@ window.addEventListener('load', () => {
   buildPeriodicTable();
   showView('home');
 
-  toast('AtomSpace initialized', 'success', '◆');
-  setTimeout(() => toast('Press 2 for Periodic Table · 3 for Atom Viewer', 'info', '⌨'), 2000);
+  toast('AtomSpace initialized ⚛', 'success', '◆');
+  setTimeout(() => {
+    const isMobile = window.innerWidth < 600;
+    if(isMobile) toast('Tip: Swipe left/right to switch views', 'info', '↔');
+    else toast('NEW: Molecule Builder · Playground · Press E to excite electrons', 'info', '⚡');
+  }, 2200);
+
+  // ── SWIPE NAVIGATION (mobile) ─────────────────────────────
+  const VIEWS = ['home','table','atom','molecule','playground','ar'];
+  let swipeStartX = 0, swipeStartY = 0, currentViewIdx = 0;
+  document.addEventListener('touchstart', e=>{
+    swipeStartX = e.touches[0].clientX;
+    swipeStartY = e.touches[0].clientY;
+  }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    const dx = e.changedTouches[0].clientX - swipeStartX;
+    const dy = e.changedTouches[0].clientY - swipeStartY;
+    // Only trigger swipe if horizontal and significant, and not on a canvas
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)*1.5) {
+      const tag = e.target.tagName.toLowerCase();
+      if(tag === 'canvas') return; // don't swipe on canvas (used for 3D drag)
+      const activeView = document.querySelector('.view.active');
+      if(activeView) {
+        const idx = VIEWS.indexOf(activeView.id.replace('view-',''));
+        if(idx !== -1) {
+          const next = dx < 0
+            ? VIEWS[Math.min(idx+1, VIEWS.length-1)]
+            : VIEWS[Math.max(idx-1, 0)];
+          if(next !== VIEWS[idx]) showView(next);
+        }
+      }
+    }
+  }, {passive:true});
+});
+</script>
+
+<!-- Mobile bottom navigation bar -->
+<nav id="mobile-nav" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:300;background:rgba(2,5,9,0.97);border-top:1px solid rgba(0,245,255,0.15);backdrop-filter:blur(16px);padding:6px 0 max(6px,env(safe-area-inset-bottom));display:flex;justify-content:space-around;align-items:center;">
+  <button onclick="showView('home')"       data-mview="home"       style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;cursor:pointer;color:#3a6880;font-family:'Share Tech Mono',monospace;font-size:0.52rem;letter-spacing:1px;min-width:48px;min-height:44px;justify-content:center;">
+    <span style="font-size:1.1rem;line-height:1;">⌂</span>HOME
+  </button>
+  <button onclick="showView('table')"      data-mview="table"      style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;cursor:pointer;color:#3a6880;font-family:'Share Tech Mono',monospace;font-size:0.52rem;letter-spacing:1px;min-width:48px;min-height:44px;justify-content:center;">
+    <span style="font-size:1.1rem;line-height:1;">⊞</span>TABLE
+  </button>
+  <button onclick="showView('atom')"       data-mview="atom"       style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;cursor:pointer;color:#3a6880;font-family:'Share Tech Mono',monospace;font-size:0.52rem;letter-spacing:1px;min-width:48px;min-height:44px;justify-content:center;">
+    <span style="font-size:1.1rem;line-height:1;">◎</span>ATOM
+  </button>
+  <button onclick="showView('molecule')"   data-mview="molecule"   style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;cursor:pointer;color:#3a6880;font-family:'Share Tech Mono',monospace;font-size:0.52rem;letter-spacing:1px;min-width:48px;min-height:44px;justify-content:center;">
+    <span style="font-size:1.1rem;line-height:1;">⬡</span>MOL
+  </button>
+  <button onclick="showView('ar')"         data-mview="ar"         style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;cursor:pointer;color:#3a6880;font-family:'Share Tech Mono',monospace;font-size:0.52rem;letter-spacing:1px;min-width:48px;min-height:44px;justify-content:center;">
+    <span style="font-size:1.1rem;line-height:1;">◈</span>AR
+  </button>
+</nav>
+
+<style>
+/* Show mobile nav only on small screens */
+@media (max-width: 600px) {
+  #mobile-nav { display: flex !important; }
+  /* Add padding to views so content isn't hidden behind mobile nav */
+  .view { padding-bottom: 60px; }
+  /* Top nav hidden on very small — use bottom nav instead */
+  nav:not(#mobile-nav) { display: none; }
+  /* Restore top padding since top nav is gone */
+  .view { padding-top: 8px; }
+  #view-table { padding-top: 16px; }
+  /* Mobile nav active state */
+  #mobile-nav button.active {
+    color: #00f5ff !important;
+    text-shadow: 0 0 8px rgba(0,245,255,0.6);
+  }
+}
+@media (max-width: 600px) {
+  #view-home { padding-top: 8px !important; padding-bottom: 70px !important; }
+}
+</style>
+
+<script>
+// Sync mobile nav active state with showView
+(function(){
+  const origShow = showView;
+  // Override showView to also sync mobile nav
+  const _sv = showView;
+  window._syncMobileNav = function(name) {
+    document.querySelectorAll('#mobile-nav button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.mview === name);
+      b.style.color = b.dataset.mview === name ? '#00f5ff' : '#3a6880';
+    });
+  };
+})();
+// Patch boot to also sync mobile nav
+document.addEventListener('DOMContentLoaded', ()=>{
+  if(typeof _syncMobileNav !== 'undefined') _syncMobileNav('home');
 });
 </script>
 </body>
