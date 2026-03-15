@@ -7,6 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<!-- Preload MediaPipe so AR mode is instant -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 <style>
 /* =============================================
    CSS CUSTOM PROPERTIES
@@ -1980,33 +1983,54 @@ function initHomeViewer() {
 // ============================================================
 //  AR MODE
 // ============================================================
+let arStream = null; // keep stream reference so we can stop it
+
 function initARMode() {
   const loading = document.getElementById('ar-loading');
   loading.style.display = 'flex';
   document.getElementById('ar-load-text').textContent = 'REQUESTING CAMERA ACCESS';
+  document.getElementById('ar-load-sub').textContent = 'Please allow camera permission...';
 
-  navigator.mediaDevices.getUserMedia({video:{width:1280,height:720,facingMode:'user'}, audio:false})
+  // Stop any previous stream
+  if (arStream) { arStream.getTracks().forEach(t => t.stop()); arStream = null; }
+
+  // Use a short timeout so the view is fully rendered before we measure canvas size
+  setTimeout(() => {
+    navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+      audio: false
+    })
     .then(stream => {
+      arStream = stream;
       const video = document.getElementById('ar-video');
       video.srcObject = stream;
       video.onloadedmetadata = () => {
-        video.play();
-        document.getElementById('ar-load-text').textContent = 'INITIALIZING 3D ENGINE';
-        document.getElementById('ar-load-sub').textContent = 'Building atom geometry...';
+        video.play().catch(()=>{});
+        document.getElementById('ar-load-text').textContent = 'BUILDING ATOM';
+        document.getElementById('ar-load-sub').textContent = 'Initializing 3D engine...';
         setupARScene();
-        setTimeout(()=>{ loading.style.display='none'; }, 800);
+        setTimeout(() => { loading.style.display = 'none'; }, 600);
       };
+      // Fallback if onloadedmetadata doesn't fire
+      setTimeout(() => {
+        if (loading.style.display !== 'none') {
+          setupARScene();
+          loading.style.display = 'none';
+        }
+      }, 3000);
     })
-    .catch(() => {
+    .catch(err => {
+      console.warn('Camera error:', err);
       document.getElementById('ar-load-text').textContent = 'DEMO MODE';
-      document.getElementById('ar-load-sub').textContent = 'Camera unavailable — using simulated tracking';
-      setTimeout(()=>{
+      document.getElementById('ar-load-sub').textContent = 'No camera — mouse controls active';
+      setTimeout(() => {
         setupARScene();
-        loading.style.display='none';
-        toast('Camera unavailable — Demo mode active', 'warn', '⚠');
+        loading.style.display = 'none';
+        toast('No camera — using mouse demo mode', 'warn', '⚠');
         simulateHandTracking();
-      }, 1200);
+      }, 1000);
     });
+  }, 120); // wait for view to paint
 }
 
 function setupARScene() {
@@ -2015,8 +2039,14 @@ function setupARScene() {
 
   if(arRenderer) { arRenderer.dispose(); cancelAnimationFrame(arFrame); arRenderer=null; }
 
-  canvas.width  = container.clientWidth;
-  canvas.height = container.clientHeight;
+  // Fallback to window size — container may not have layout yet
+  const W = (container.clientWidth  > 10 ? container.clientWidth  : window.innerWidth);
+  const H = (container.clientHeight > 10 ? container.clientHeight : window.innerHeight) - 56;
+  canvas.width  = W;
+  canvas.height = H;
+  // Also size gesture canvas upfront
+  const gc = document.getElementById('gesture-canvas');
+  gc.width = W; gc.height = H;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference:'high-performance' });
   renderer.setSize(canvas.width, canvas.height);
@@ -2081,26 +2111,32 @@ function startHandTracking() {
   document.getElementById('hud-hands').textContent = 'LOADING';
   document.getElementById('hud-hands').className = 'hud-val warn';
 
-  // Load MediaPipe dynamically
-  if(typeof Hands !== 'undefined') { initMediaPipe(); return; }
-  const s1 = document.createElement('script');
-  s1.crossOrigin = 'anonymous';
-  s1.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js';
-  s1.onload = () => {
-    const s2 = document.createElement('script');
-    s2.crossOrigin = 'anonymous';
-    s2.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js';
-    s2.onload  = initMediaPipe;
-    s2.onerror = fallbackToMouse;
-    document.head.appendChild(s2);
-  };
-  s1.onerror = fallbackToMouse;
-  document.head.appendChild(s1);
+  // Scripts are preloaded in <head> — check and retry if not ready yet
+  if (typeof Hands !== 'undefined' && typeof Camera !== 'undefined') {
+    initMediaPipe();
+  } else {
+    // Scripts still loading — wait up to 5s
+    let attempts = 0;
+    const poll = setInterval(() => {
+      attempts++;
+      if (typeof Hands !== 'undefined' && typeof Camera !== 'undefined') {
+        clearInterval(poll);
+        initMediaPipe();
+      } else if (attempts > 25) {
+        clearInterval(poll);
+        toast('MediaPipe failed to load — using mouse demo', 'warn', '⚠');
+        fallbackToMouse();
+      }
+    }, 200);
+  }
 }
 
 function initMediaPipe() {
   const video = document.getElementById('ar-video');
-  if(!video.srcObject) { fallbackToMouse(); return; }
+  if (!video.srcObject) {
+    toast('Camera not ready — try again in a moment', 'warn', '⚠');
+    fallbackToMouse(); return;
+  }
 
   try {
     const hands = new Hands({
@@ -2114,16 +2150,27 @@ function initMediaPipe() {
     });
     hands.onResults(onHandResults);
 
-    const cam = new Camera(video, {
-      onFrame: async () => { await hands.send({image:video}); },
-      width: 640, height: 480,
-    });
-    cam.start();
-    mediapipeHands = hands; mpCamera = cam;
-    setTextSafe('hud-hands','ACTIVE');
-    document.getElementById('hud-hands').className='hud-val active';
-    toast('Hand tracking active', 'success', '◈');
+    const startCam = () => {
+      const cam = new Camera(video, {
+        onFrame: async () => {
+          try { await hands.send({ image: video }); } catch(e) {}
+        },
+        width: 640, height: 480,
+      });
+      cam.start();
+      mediapipeHands = hands; mpCamera = cam;
+      setTextSafe('hud-hands', 'ACTIVE');
+      document.getElementById('hud-hands').className = 'hud-val active';
+      document.getElementById('gesture-guide').style.opacity = '1';
+      toast('Hand tracking active ✋', 'success', '◈');
+    };
+
+    // Start only when video is actually playing
+    if (video.readyState >= 2) { startCam(); }
+    else { video.addEventListener('canplay', startCam, { once: true }); }
+
   } catch(e) {
+    console.error('MediaPipe error:', e);
     fallbackToMouse();
   }
 }
