@@ -177,12 +177,6 @@ git commit -m "your message"
 git push
 ```
 
----
 
-## License
-
-MIT — free to use, modify, and distribute.
-
----
 
 *Built with Three.js · MediaPipe · pure HTML/CSS/JS*
