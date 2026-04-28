@@ -1,4 +1,4 @@
-# ⚛️ AtomSpace
+# ⚛️ Tatva — The AtomSpace
 
 ### Gesture-Controlled Periodic Table — Next Generation Science Interface
 
@@ -101,42 +101,39 @@ npx serve .
 | `1` | Home |
 | `2` | Periodic Table |
 | `3` | Atom Viewer |
-| `4` | AR Mode |
+| `5` | Molecule Builder |
+| `6` | Playground |
 | `←` `→` | Previous / Next element |
 | `R` | Toggle auto-rotate |
 | `O` | Toggle orbital diagram |
 | `W` | Toggle wireframe |
 | `X` | Toggle explode view |
+| `E` | Excite electron (Atom view) |
 | `S` | Toggle sound effects |
+| `F` | Explode all particles (Playground) |
+| `G` | Toggle gravity mode (Playground) |
 | `Esc` | Close modals |
 
 ---
 
 ## Project Structure
 
-```
-atomspace/
-├── index.html        # Entire application — single file
-└── README.md
+```text
+tatva/
+├── index.html        # Entry point and layout
+├── css/
+│   └── style.css     # Global styles and UI themes
+└── js/
+    ├── state.js      # Global application state variables
+    ├── data.js       # Periodic table and element database
+    ├── utils.js      # Helpers, audio, toast notifications
+    ├── atom.js       # 3D atom rendering and explode physics
+    ├── molecule.js   # Molecule builder and bonding logic
+    ├── playground.js # N-body particle physics simulator
+    └── main.js       # Initialization, UI event listeners, AR logic
 ```
 
-All logic is organized into clearly commented sections inside `index.html`:
-
-```
-// ELEMENT DATABASE       — 118 elements with full atomic data
-// STARFIELD              — animated canvas background
-// VIEW MANAGEMENT        — page routing with transitions
-// PERIODIC TABLE         — grid builder, search, filter, compare
-// TOOLTIP SYSTEM         — hover element cards
-// ELEMENT COMPARISON     — side-by-side modal
-// THREE.JS ATOM BUILDER  — nucleus + shells + particles
-// ATOM ANIMATION LOOP    — electron orbital math, explode, trails
-// ATOM VIEWER            — drag/scroll/touch interaction
-// AR MODE                — camera init, canvas sizing
-// HAND TRACKING          — MediaPipe setup, gesture processing
-// GESTURE DETECTION      — pinch zoom, wave rotate, electron push
-// SOUND ENGINE           — Web Audio API tones per element
-```
+The application logic has been modularized into distinct files for optimal performance and maintainability, separating the core data, 3D visualizations, physics engines, and UI handlers.
 
 ---
 
