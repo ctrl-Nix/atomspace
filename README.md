@@ -2,7 +2,7 @@
 
 ### Gesture-Controlled Periodic Table — Next Generation Science Interface
 
-A futuristic, fully interactive periodic table with real-time 3D atom visualization and hand gesture control via webcam. No frameworks, no build step — a single HTML file.
+A futuristic, fully interactive periodic table with real-time 3D atom visualization and hand gesture control via webcam. No frameworks, no build step — pure vanilla JavaScript and CSS.
 
 **[Live Demo →](https://tatva.vercel.app)**
 
@@ -79,7 +79,7 @@ No install, no build step required.
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourname/atomspace.git
+git clone https://github.com/ctrl-Nix/atomspace.git
 cd atomspace
 
 # Option A — open directly (table + viewer work, camera may not)
