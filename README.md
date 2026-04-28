@@ -4,7 +4,7 @@
 
 A futuristic, fully interactive periodic table with real-time 3D atom visualization and hand gesture control via webcam. No frameworks, no build step — a single HTML file.
 
-**[Live Demo →](https://atomspace.vercel.app)**
+**[Live Demo →](https://tatva.vercel.app)**
 
 ---
 
