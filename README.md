@@ -59,6 +59,13 @@ A futuristic, fully interactive periodic table with real-time 3D atom visualizat
 - Side-by-side modal showing: atomic mass, melting point, boiling point, density, period, group, electron config
 - Green/red highlights for higher/lower numeric values
 
+
+---
+
+## Physics Design Decisions
+
+To create a visually accurate and mathematically elegant nucleus, we implemented a **Fibonacci sphere distribution** for packing protons and neutrons. Instead of arbitrary random placement or a rigid cubic grid, the Fibonacci lattice ensures optimal, uniform packing density on the sphere's surface and volume. This mimics the natural repulsive forces between nucleons, resulting in a perfectly balanced, spherical nucleus that scales dynamically from Hydrogen to Oganesson without artificial clustering or gaps.
+
 ---
 
 ## Tech Stack
